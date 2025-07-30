@@ -19,14 +19,19 @@ export const theme = {
     
     fonts: {
         default: fontGenerator(
-            "IBMPlexSansKR-Regular",
+            "IBMPlexSansKR-Medium",
             "1rem",
             "400",
             "140%",
             "-0.025em"
         ),
-        Press: fontGenerator("PressStart2P-Regular"),
-        Galmuri: fontGenerator("Galmuri14"),
+        PressStart2P: {
+            "font-family": '"Press Start 2P"', 
+            "font-weight": "400",
+            "line-height": "140%",
+            "letter-spacing": "-0.025em",
+        },
+        Galmuri: fontGenerator('"Galmuri14"'),
         IBMMedium: fontGenerator("IBMPlexSansKR-Medium"),
         IBMSemiBold: fontGenerator("IBMPlexSansKR-SemiBold"),
         IBMBold: fontGenerator("IBMPlexSansKR-Bold"),
