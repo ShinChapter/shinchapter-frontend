@@ -5,8 +5,11 @@ import Button from '../components/Button';
 import Soojung from '../assets/images/soojung.png';
 import Logo from '../assets/icons/logo.png';
 import Title from '../assets/images/title.png';
+import { useNavigate } from 'react-router-dom';
 
 const MainPage = () => {
+    const navigate = useNavigate();
+
     return (
         <S.Wrapper backgroundImageUrl={Soojung}>
             <Layout>
@@ -14,7 +17,7 @@ const MainPage = () => {
                     <S.Logo src={Logo} />
                     <S.Title src={Title} />
                     <S.Desc>SUNGSHIN WOMEN'S UNIVERSITY + METAVERSE</S.Desc>
-                    <Button text="START" />
+                    <Button text="START" onClick={() => navigate('/login')}/>
                 </S.Container>
             </Layout>
         </S.Wrapper>
