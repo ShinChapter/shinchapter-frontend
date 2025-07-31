@@ -2,7 +2,6 @@ import styled from "styled-components";
 
 export const Wrapper = styled.div`
     width: 100%;
-    height: 100vh;
     background-image: ${({backgroundImageUrl}) => `url(${backgroundImageUrl})`};
     background-repeat: no-repeat;
     background-position: center;
@@ -17,7 +16,6 @@ export const Container = styled.div`
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    height: 100vh;
 `
 
 export const Logo = styled.img`

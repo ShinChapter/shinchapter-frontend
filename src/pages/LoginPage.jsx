@@ -5,8 +5,11 @@ import Button from '../components/Button';
 import Sungshin from '../assets/images/sungshin.png';
 import SchoolShape1 from '../assets/images/school-shape1.png';
 import Google from '../assets/icons/google.png';
+import { useNavigate } from 'react-router-dom';
 
 const LoginPage = () => {
+    const navigate = useNavigate();
+    
     const [firstTry, setFirstTry] = useState(true);
 
     return (
@@ -23,7 +26,10 @@ const LoginPage = () => {
                             {firstTry ? "학교 이메일로 바로 입장하기" : "학교 이메일로 로그인 해주세요"}
                         </S.Desc>
                     </S.RowWrapper>
-                    <Button text={firstTry ? "START" : "RERTY"} />
+                    <Button 
+                        text={firstTry ? "START" : "RERTY"}
+                        onClick={() => navigate('/explanation')} 
+                    />
                 </S.Container>
             </Layout>
         </S.Wrapper>
