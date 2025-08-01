@@ -1,9 +1,9 @@
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import Layout from './layout/Layout';
 import MainPage from './pages/MainPage';
 import LoginPage from './pages/LoginPage';
 import ExplanationPage from './pages/ExplanationPage';
+import CameraPage from './pages/CameraPage';
 
 const App = () => {
     return (
@@ -12,6 +12,7 @@ const App = () => {
                 <Route path='/' element={<MainPage />} />
                 <Route path='/login' element={<LoginPage />} />
                 <Route path='/explanation' element={<ExplanationPage />} />
+                <Route path='/camera' element={<CameraPage />} />
             </Routes>
         </BrowserRouter>
     )

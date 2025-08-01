@@ -5,8 +5,11 @@ import Button from '../components/Button';
 import ServiceExplanation from '../components/ServiceExplanation';
 import SchoolShape2 from '../assets/images/school-shape2.png';
 import Example from '../assets/images/example.png';
+import { useNavigate } from 'react-router-dom';
 
 const ExplanationPage = () => {
+    const navigate = useNavigate();
+    
     return (
         <S.Wrapper>
             <Layout>
@@ -41,7 +44,7 @@ const ExplanationPage = () => {
                         />
                     </S.ExplanationWrapper>
                 </S.ContentWrapper>
-                <Button text="NEXT"/>
+                <Button text="NEXT" onClick={() => navigate('/camera')}/>
             </Layout>
         </S.Wrapper>
     )
