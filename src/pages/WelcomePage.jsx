@@ -1,5 +1,5 @@
 import React from 'react';
-import * as S from './MainPage.styled';
+import * as S from './WelcomePage.styled';
 import Layout from './../layout/Layout';
 import Button from '../components/Button';
 import Soojung from '../assets/images/soojung.png';
@@ -7,7 +7,7 @@ import Logo from '../assets/icons/logo.png';
 import Title from '../assets/images/title.png';
 import { useNavigate } from 'react-router-dom';
 
-const MainPage = () => {
+const WelcomePage = () => {
     const navigate = useNavigate();
 
     return (
@@ -24,4 +24,4 @@ const MainPage = () => {
     )
 }
 
-export default MainPage
+export default WelcomePage
