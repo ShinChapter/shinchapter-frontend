@@ -13,7 +13,6 @@ const Wrapper = styled.button`
     background-color: rgba(0, 0, 0, 0.35);
     border: 1px solid #FFFFFF;
     border-radius: 35px;
-    ${({ theme }) => theme.fonts.PressStart};
     font-size: 35px;
     height: 85px;
     width: 300px;

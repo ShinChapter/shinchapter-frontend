@@ -5,8 +5,11 @@ import Button from './../components/Button';
 import Light from '../assets/images/light.png';
 import Character from '../assets/images/character.png';
 import Blur from '../assets/images/blur.png';
+import { useNavigate } from 'react-router-dom';
 
 const CharacterPage = () => {
+    const navigate = useNavigate();
+
     const [name, setName] = useState('사용자');
 
     return (
@@ -23,7 +26,7 @@ const CharacterPage = () => {
                         <S.Desc>안녕하세요 <S.Name>{name}</S.Name>님</S.Desc>
                         <S.Desc>당신의 새 출발을 응원합니다</S.Desc>
                     </S.DescWrapper>
-                    <Button text="ENTER"/>
+                    <Button text="ENTER" onClick={() => navigate('/home')}/>
                 </S.RightWrapper>
                 </S.RowWrapper>
             </Layout>
