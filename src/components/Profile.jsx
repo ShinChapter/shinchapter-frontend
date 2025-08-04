@@ -18,7 +18,7 @@ const Profile = () => {
             <IconWrapper>
                 {hasAlbum ? (
                     <>
-                        <button onClick={() => navigate('/')}>
+                        <button onClick={() => navigate('/album')}>
                             <Icon src={Album} />
                         </button>
                         <button onClick={() => navigate('/')}>

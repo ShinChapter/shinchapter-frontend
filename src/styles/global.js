@@ -110,7 +110,12 @@ input:focus {
     font-weight: normal;
     font-style: normal;
 }
-
+@font-face {
+    font-family: 'GrandifloraOne';
+    src: url('../../fonts/GrandifloraOne-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
 `;
 
 export default GlobalStyle;

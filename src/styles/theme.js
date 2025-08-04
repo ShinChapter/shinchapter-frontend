@@ -35,5 +35,7 @@ export const theme = {
         IBMMedium: fontGenerator("IBMPlexSansKR-Medium"),
         IBMSemiBold: fontGenerator("IBMPlexSansKR-SemiBold"),
         IBMBold: fontGenerator("IBMPlexSansKR-Bold"),
+        GrandifloraOne: fontGenerator("GrandifloraOne"),
+        
     },
 };
