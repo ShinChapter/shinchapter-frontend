@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import * as S from './ExplanationPage.styled';
 import Layout from '../layout/Layout';
 import Button from '../components/Button';
@@ -9,7 +9,22 @@ import { useNavigate } from 'react-router-dom';
 
 const ExplanationPage = () => {
     const navigate = useNavigate();
-    
+
+    useEffect(() => {
+    console.log("현재 URL:", window.location.href); // 이 줄 추가
+
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+
+    if (token) {
+        localStorage.setItem("token", token);
+        console.log("토큰 저장됨:", token);
+    } else {
+        console.log("로그인 토큰이 없습니다. 다시 로그인 해주세요.");
+        navigate("/login");
+    }
+    }, [navigate]);
+
     return (
         <S.Wrapper>
             <Layout>
