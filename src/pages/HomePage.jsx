@@ -7,6 +7,7 @@ import Profile from '../components/Profile';
 import Information from '../components/Information';
 import PurpleBackground from '../assets/images/purple-background.png';
 import SchoolShape from '../assets/images/school-shape3.png';
+import Modal from '../components/Modal';
 
 const HomePage = () => {
     return (
@@ -22,6 +23,7 @@ const HomePage = () => {
                     </S.ContentWrapper>
                 </S.SchoolShapeWrapper>
             </Layout>
+            <Modal/>
         </S.Wrapper>
     )
 }
