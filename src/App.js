@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import WelcomePage from './pages/WelcomePage';
 import LoginPage from './pages/LoginPage';
 import ExplanationPage from './pages/ExplanationPage';
+import InformationPage from './pages/InformationPage';
 import CameraPage from './pages/CameraPage';
 import CharacterPage from './pages/CharacterPage';
 import HomePage from './pages/HomePage';
@@ -15,6 +16,7 @@ const App = () => {
                 <Route path='/' element={<WelcomePage />} />
                 <Route path='/login' element={<LoginPage />} />
                 <Route path='/explanation' element={<ExplanationPage />} />
+                <Route path='/information' element={<InformationPage />} />
                 <Route path='/camera' element={<CameraPage />} />
                 <Route path='/character' element={<CharacterPage />} />
                 <Route path='/home' element={<HomePage />} />

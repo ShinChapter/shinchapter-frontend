@@ -13,9 +13,9 @@ const Wrapper = styled.button`
     background-color: rgba(0, 0, 0, 0.35);
     border: 1px solid #FFFFFF;
     border-radius: 35px;
-    font-size: 35px;
-    height: 85px;
-    width: 300px;
+    font-size: 30px;
+    height: 70px;
+    width: 250px;
     display: flex;
     align-items: center;
     justify-content: center;
