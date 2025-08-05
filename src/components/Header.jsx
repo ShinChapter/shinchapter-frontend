@@ -18,6 +18,7 @@ const Wrapper = styled.button`
     position: absolute;
     left: 50px;
     top: 30px;
+    z-index: 10;
 
     @media (max-width: 1500px) {
         display: none;

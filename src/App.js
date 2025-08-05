@@ -7,6 +7,7 @@ import InformationPage from './pages/InformationPage';
 import CameraPage from './pages/CameraPage';
 import CharacterPage from './pages/CharacterPage';
 import HomePage from './pages/HomePage';
+import MetaversePage from './pages/MetaversePage';
 import AlbumPage from './pages/AlbumPage';
 
 const App = () => {
@@ -20,6 +21,7 @@ const App = () => {
                 <Route path='/camera' element={<CameraPage />} />
                 <Route path='/character' element={<CharacterPage />} />
                 <Route path='/home' element={<HomePage />} />
+                <Route path='/metaverse' element={<MetaversePage />} />
                 <Route path='/album' element={<AlbumPage />} />
             </Routes>
         </BrowserRouter>
