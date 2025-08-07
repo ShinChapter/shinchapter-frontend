@@ -66,7 +66,7 @@ const PlayerControls = ({ moveTo, setMoveTo }) => {
         camera.position.set(newPos.x, newPos.y + 1.6, newPos.z);
 
         // 위치 출력
-        console.log(`현재 위치: new THREE.Vector3(${newPos.x.toFixed(2)}, ${newPos.y.toFixed(2)}, ${newPos.z.toFixed(2)})`);
+        // console.log(`현재 위치: new THREE.Vector3(${newPos.x.toFixed(2)}, ${newPos.y.toFixed(2)}, ${newPos.z.toFixed(2)})`);
     });
 
     return (

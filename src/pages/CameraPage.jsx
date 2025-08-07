@@ -1,16 +1,21 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as S from './CameraPage.styled';
 import Layout from './../layout/Layout';
 import Button from '../components/Button';
 import Webcam from 'react-webcam';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../apis/axiosInstance';
+import loading from '../assets/images/loading.gif';
 
 const CameraPage = () => {
     const navigate = useNavigate();
 
-    const [state, setState] = useState("RECORD"); // record, next 중 하나
+    const [state, setState] = useState("RECORD"); // record, next, LOADING 중 하나
     const [image, setImage] = useState(null);
+    const [jobId, setJobId] = useState(null);
+    const [status, setStatus] = useState(null);
     const webcamRef = useRef(null);
+    const pollingRef = useRef(null);
 
     const getFlippedImage = (webcam) => {
         const screenshot = webcam.getScreenshot();
@@ -36,22 +41,71 @@ const CameraPage = () => {
         });
     };
 
-    const handleClick = async () => {
-        if (state === "RECORD") {
-            if (webcamRef.current) {
-                const flippedScreenshot = await getFlippedImage(webcamRef.current);
-                if (flippedScreenshot) {
-                    setImage(flippedScreenshot);
-                    setState("NEXT");
-                }
+    const handleRecord = async () => {
+        if (webcamRef.current) {
+            const flippedScreenshot = await getFlippedImage(webcamRef.current);
+            if (flippedScreenshot) {
+                setImage(flippedScreenshot);
+                setState("NEXT");
             }
-        } else if (state === "NEXT") {
-            // 백엔드로 사진 전송 코드 추가
-            
-            navigate('/character');
-
         }
-    };
+    }
+
+    const handlePhoto = async () => {
+        try {
+            setState("LOADING");
+            const blob = await (await fetch(image)).blob();
+            const formData = new FormData();
+            formData.append("file", blob, "photo.jpg");
+            const response = await axiosInstance.post('/character/create', formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            })
+            const receivedJobId = response?.data?.job_id;
+            if (receivedJobId) {
+                setJobId(receivedJobId);
+                console.log('사진 전송 성공, job_id:', receivedJobId);
+            } else {
+                console.warn('job_id가 응답에 없습니다.');
+            }
+        } catch (error) {
+            console.log('사진 전송 실패', error);
+            setState("NEXT");
+        }
+    }
+
+    const handleStatus = async () => {
+        if (!jobId) return;
+
+        try {
+            const response = await axiosInstance.get(`/character/status/${jobId}`);
+            const result = response?.data;
+            console.log('캐릭터 생성 상태', result);
+            setStatus(result.status);
+
+            if (result.status === 'done') {
+                clearInterval(pollingRef.current);
+                navigate('/explanation', { state: { modelUrl: result.model_url } });
+            } else if (result.status === 'failed') {
+                clearInterval(pollingRef.current);
+                alert("캐릭터 생성에 실패했습니다. 다시 시도해주세요.");
+                setState("NEXT");
+            }
+        } catch (error) {
+            console.log('캐릭터 생성 상태 가져오기 실패', error);
+        }
+    }
+
+    useEffect(() => {
+        if (jobId) {
+            pollingRef.current = setInterval(handleStatus, 5000);
+        }
+
+        return () => {
+            if (pollingRef.current) {
+                clearInterval(pollingRef.current);
+            }
+        }
+    }, [jobId])
 
     return (
         <S.Wrapper>
@@ -86,7 +140,10 @@ const CameraPage = () => {
                         />
                     )}
                 </S.CameraWrapper>
-                <Button text={state} onClick={handleClick}/>
+                {state === "LOADING" && (
+                    <img src={loading} />
+                )}
+                <Button text={state} onClick={state==="RECORD" ? handleRecord : handlePhoto}/>
             </Layout>
         </S.Wrapper>
     )

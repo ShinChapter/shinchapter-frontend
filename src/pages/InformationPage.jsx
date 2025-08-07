@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as S from './InformationPage.styled';
 import Button from './../components/Button';
 import PurpleGradation from '../assets/images/purple-gradation.png';
 import Logo from '../assets/icons/logo.png';
+import axiosInstance from './../apis/axiosInstance';
+import { useNavigate } from 'react-router-dom';
 
 const InformationPage = () => {
+    const navigate = useNavigate();
     const [major, setMajor] = useState();
     const [doubleMajor, setDoubleMajor] = useState();
     const [hashtags, setHashtags] = useState();
@@ -30,14 +33,38 @@ const InformationPage = () => {
         try {
             const tags = hashtags
                 .split(' ')
+                .map(tag => tag.trim())
                 .filter(tag => tag.startsWith('#') && tag.length > 1)
+                .map(tag => tag.slice(1))
                 .slice(0, 4);
             console.log('해시태그:', tags);
+            console.log('보낼 데이터', major, doubleMajor, tags, introduction);
+            const response = await axiosInstance.post('/user/add-info', {
+                major: major,
+                minor: doubleMajor,
+                hashtags: tags,
+                introduction,
+            });
+            console.log('추가 정보 입력 성공', response);
+            navigate('/explanation');
         } catch(error) {
-            console.log(error);
+            console.log('추가 정보 입력 실패', error);
         }
     }
 
+    useEffect(() => {
+        console.log("현재 URL:", window.location.href);
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get("token");
+
+        if (token) {
+            localStorage.setItem("token", token);
+            console.log("저장된 토그:", token);
+        } else {
+            console.log("로그인 토큰이 없습니다. 다시 로그인 해주세요.");
+            navigate("/login");
+        }
+    }, [navigate]);
 
     return (
         <S.Wrapper>

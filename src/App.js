@@ -8,6 +8,8 @@ import CameraPage from './pages/CameraPage';
 import CharacterPage from './pages/CharacterPage';
 import HomePage from './pages/HomePage';
 import MetaversePage from './pages/MetaversePage';
+import MetaverseCameraPage from './pages/MetaverseCameraPage';
+import SelectionPage from './pages/SelectionPage';
 import AlbumPage from './pages/AlbumPage';
 
 const App = () => {
@@ -22,6 +24,8 @@ const App = () => {
                 <Route path='/character' element={<CharacterPage />} />
                 <Route path='/home' element={<HomePage />} />
                 <Route path='/metaverse' element={<MetaversePage />} />
+                <Route path='/metaverse/camera' element={<MetaverseCameraPage />} />
+                <Route path='/selection' element={<SelectionPage />} />
                 <Route path='/album' element={<AlbumPage />} />
             </Routes>
         </BrowserRouter>

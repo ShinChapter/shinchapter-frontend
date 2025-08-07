@@ -21,12 +21,12 @@ const Profile = () => {
                         <button onClick={() => navigate('/album')}>
                             <Icon src={Album} />
                         </button>
-                        <button onClick={() => navigate('/')}>
+                        <button onClick={() => navigate('/metaverse')}>
                             <Icon src={Metaverse} />
                         </button>
                     </>
                 ) : (
-                    <button onClick={() => navigate('/')}>
+                    <button onClick={() => navigate('/metaverse')}>
                         <Icon src={Camera} />
                     </button>
                 )}
