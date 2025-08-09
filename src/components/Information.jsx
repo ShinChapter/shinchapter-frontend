@@ -1,29 +1,60 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import RegularHexagon from '../assets/images/regular-hexagon.png';
 import Line from '../assets/images/line1.png';
 import Brain from '../assets/icons/brain.png';
 import Key from '../assets/icons/key.png';
 import Message from '../assets/icons/message.png';
+import axiosInstance from './../apis/axiosInstance';
 
 const Information = () => {
+    const [studentNumber, setStudentNumber] = useState();
+    const [year, setYear] = useState();
+    const [major, setMajor] = useState();
+    const [doubleMajor, setDoubleMajor] = useState();
+    const [hashtags, setHashtags] = useState();
+    const [introduction, setIntroduction] = useState();
+
+    const handleInformation = async () => {
+        try {
+            const response = await axiosInstance.get('/me');
+            console.log('정보 조회', response);
+            setStudentNumber(response.data.email);
+            const emailNumber = response.data.email.match(/^(\d{8})/);
+            setStudentNumber(emailNumber[0]);
+            setYear(emailNumber[0].substring(2, 4));
+            setMajor(response.data.major);
+            setDoubleMajor(response.data.minor);
+            setHashtags(response.data.hashtags);
+            setIntroduction(response.data.introduction);
+        } catch(error) {
+            console.log('정보 조회 실패', error);
+        }
+    }
+
+    useEffect(() => {
+        handleInformation();
+    }, [])
+
     return (
         <Wrapper>
             <Title>INFORMATION</Title>
             <CategoryWrapper>
                 <TextWrappr>
                     <LineImg1 src={Line} />
-                    <Text>20231234</Text>
+                    <Text>{studentNumber}</Text>
                 </TextWrappr>
                 <ImgWrapper imageUrl={RegularHexagon}>
-                    <StudentNumber>23</StudentNumber>
+                    <StudentNumber>{year}</StudentNumber>
                 </ImgWrapper>
             </CategoryWrapper>
             <CategoryWrapper>
                 <TextWrappr>
                     <LineImg1 src={Line} />
-                    <Text>주전공: AI</Text>
-                    <Text>복수전공: 지능형 IoT</Text>
+                    <Text>주전공: {major}</Text>
+                    {doubleMajor && (
+                        <Text>복수전공: {doubleMajor}</Text>
+                    )}
                 </TextWrappr>
                 <ImgWrapper imageUrl={RegularHexagon}>
                     <Icon src={Brain} />
@@ -32,10 +63,11 @@ const Information = () => {
             <CategoryWrapper>
                 <TextWrappr>
                     <LineImg1 src={Line} />
-                    <Text>#블랙핑크</Text>
-                    <Text>#커피러버</Text>
-                    <Text>#늦잠러</Text>
-                    <Text>#메타몽</Text>
+                    {hashtags && (
+                        hashtags.map((hashtag, index) => (
+                            <Text key={index}># {hashtag}</Text>
+                        ))
+                    )}
                 </TextWrappr>
                 <ImgWrapper imageUrl={RegularHexagon}>
                     <Icon src={Key} />
@@ -45,8 +77,7 @@ const Information = () => {
                 <TextWrappr>
                     <LineImg1 src={Line} />
                     <LineImg2 src={Line} />
-                    <Text>"더이상의 지각은 없다."</Text>
-                    <Text>"노지각"</Text>
+                    <Text>{introduction}</Text>
                 </TextWrappr>
                 <ImgWrapper imageUrl={RegularHexagon}>
                     <Icon src={Message} />

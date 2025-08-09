@@ -17,3 +17,12 @@ export const CameraWrapper = styled.div`
     align-items: center;
     justify-content: center;
 `
+
+export const Loading = styled.img`
+    width: 200px;
+    height: 200px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+`

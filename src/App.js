@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import ExplanationPage from './pages/ExplanationPage';
 import InformationPage from './pages/InformationPage';
 import CameraPage from './pages/CameraPage';
+import HairPage from './pages/HairPage';
 import CharacterPage from './pages/CharacterPage';
 import HomePage from './pages/HomePage';
 import MetaversePage from './pages/MetaversePage';
@@ -21,6 +22,7 @@ const App = () => {
                 <Route path='/explanation' element={<ExplanationPage />} />
                 <Route path='/information' element={<InformationPage />} />
                 <Route path='/camera' element={<CameraPage />} />
+                <Route path='/hair' element={<HairPage />} />
                 <Route path='/character' element={<CharacterPage />} />
                 <Route path='/home' element={<HomePage />} />
                 <Route path='/metaverse' element={<MetaversePage />} />

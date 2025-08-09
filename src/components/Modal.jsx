@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import Character from '../assets/images/character.png';
 
-const Modal = () => {
-    const [name, setName] = useState('사용자');
+const Modal = ({ name, characterImage }) => {
 
     return (
         <Wrapper>
             <ProfileWrapper>
-                <ProfileImage src={Character}/>
+                <ProfileImage src={characterImage}/>
             </ProfileWrapper>
             <Text>
                 {name}님이 그룹에 초대하였습니다.

@@ -1,24 +1,93 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import UserPlus from '../assets/icons/user-plus.png';
 import Send from '../assets/icons/send.png';
 import Line from '../assets/images/line2.png';
 import Character from '../assets/images/character.png';
 import { FriendData } from '../constant/friendData';
+import axiosInstance from './../apis/axiosInstance';
 
 const Friend = () => {
     const [mode, setMode] = useState('list'); // list, group, invite 중 하나
+    const [hasGroup, isHasGroup] = useState(false);
     const [groupName, setGroupName] = useState('');
-    const [FriendStudentNumber, setFriendStudentNumber] = useState();
+    const [groupId, setGroupId] = useState();
+    const [friendStudentNumber, setFriendStudentNumber] = useState();
+    const [groupMember, setGroupMember] = useState([]); // 그룹 멤버 전체
 
     const colors = ['#FFDBEE', '#D0FFFA', '#E4C5FF', '#FFFED3', '#B3B2B2', '#FFFFFF'];
+    
+    const getGroup = async () => {
+        try {
+            const response = await axiosInstance.get('/album-group/my');
+            setGroupMember(response.data.members);
+            console.log('그룹 존재함', response.data);
+            isHasGroup(true);
+        } catch(error) {
+            if (error.status===404) {
+                isHasGroup(false);
+                console.log('그룹 없음');
+            } else {
+                console.log('내 그룹 목록 조회 실패', error.response);
+            }
+        }
+    }
+
+    const handleMode = () => {
+        if (hasGroup) {
+            setMode('invite');
+        } else {
+            setMode('group');
+        }
+    }
+
+    const handleGroupName = async () => {
+        console.log(groupName);
+        try {
+            const response = await axiosInstance.post('/group/create', {
+                name: groupName,
+            })
+            console.log('그룹 생성', response);
+            setGroupName('');
+            isHasGroup(true);
+            setGroupId(response.data.group_id);
+            setMode('invite');
+        } catch(error) {
+            console.log('그룹 생성 실패', error);
+            setMode('list');
+        }
+    }
+
+    const handleGroupMember = async () => { // 친구 추가
+        try {
+            console.log(friendStudentNumber);
+            const response = await axiosInstance.post('/group/invite', {
+                student_id: friendStudentNumber,
+            })
+            console.log('친구 초대', response);
+            setMode('list');
+            alert('초대가 완료되었습니다.');
+        } catch(error) {
+            if (error.status===400) {
+                alert('이미 다른 그룹에 속해 있는 사용자는 초대할 수 없습니다.')
+            } else if (error.status===404) {
+                alert('해당 사용자를 찾을 수 없습니다.')
+            }
+            console.log('친구 초대 실패', error);
+            setMode('list');
+        }
+    }
+
+    useEffect(() => {
+        getGroup();
+    }, [])
     
     return (
         <Wrapper>
             {mode==="list" ? (
                 <TopWrapper>
                     <Title>FRIENDS</Title>
-                    <UserIconWrapper onClick={() => setMode('group')}>
+                    <UserIconWrapper onClick={handleMode}>
                         <Icon src={UserPlus} />
                     </UserIconWrapper>
                 </TopWrapper>
@@ -26,16 +95,20 @@ const Friend = () => {
             mode==="group" ? (
                 <TopWrapper>
                     <Category>그룹명: </Category>
-                    <Input />
-                    <SendIconWrapper onClick={() => setMode('invite')}>
+                    <Input 
+                        onChange={(event)=>setGroupName(event.target.value)}
+                    />
+                    <SendIconWrapper onClick={handleGroupName}>
                         <Icon src={Send} />
                     </SendIconWrapper>
                 </TopWrapper>
             ) : (
                 <TopWrapper>
                     <Category>학번: </Category>
-                    <Input />
-                    <SendIconWrapper onClick={() => setMode('list')}>
+                    <Input 
+                        onChange={(event)=>setFriendStudentNumber(event.target.value)}
+                    />
+                    <SendIconWrapper onClick={handleGroupMember}>
                         <Icon src={Send} />
                     </SendIconWrapper>
                 </TopWrapper>
@@ -44,13 +117,15 @@ const Friend = () => {
                 <LineImg1 src={Line} />
                 <LineImg2 src={Line} />
                 <FriendList>
-                    {FriendData.map((friend, index) => (
-                        <Member>
-                            <MemberBackground style={{ backgroundColor: colors[index % colors.length] }}>
-                                <MembeImg src={Character}/>
-                            </MemberBackground>
-                            <MemberName>{friend.name}</MemberName>
-                        </Member>
+                    {groupMember.map((friend, index) => (
+                        (index!==0 && friend.accepted) && (
+                            <Member>
+                                <MemberBackground style={{ backgroundColor: colors[index % colors.length] }}>
+                                    <MembeImg src={Character}/>
+                                </MemberBackground>
+                                <MemberName>{friend.name}</MemberName>
+                            </Member>
+                        )
                     ))}
                 </FriendList>
             </FriendListWrapper>

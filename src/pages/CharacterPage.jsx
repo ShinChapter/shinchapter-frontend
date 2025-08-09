@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as S from './CharacterPage.styled';
 import Layout from './../layout/Layout';
 import Button from './../components/Button';
@@ -6,11 +6,27 @@ import Light from '../assets/images/light.png';
 import Character from '../assets/images/character.png';
 import Blur from '../assets/images/blur.png';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../apis/axiosInstance';
 
 const CharacterPage = () => {
     const navigate = useNavigate();
 
     const [name, setName] = useState('사용자');
+    const [characterImage, setCharacterImage] = useState();
+
+    const handleCharacter = async () => {
+        try {
+            const response = await axiosInstance.get('/character/my');
+            console.log('캐릭터 조회', response);
+            setCharacterImage(response.data.preview_url);
+        } catch(error) {
+            console.log('캐릭터 조회 실패', error);
+        }
+    }
+    
+    useEffect(() => {
+        handleCharacter();
+    }, [])
 
     return (
         <S.Wrapper>
@@ -18,7 +34,7 @@ const CharacterPage = () => {
                 <S.RowWrapper>
                 <S.CharacterWrapper>
                     <S.Light src={Light} />
-                    <S.Character src={Character} />
+                    <S.Character src={characterImage} />
                 </S.CharacterWrapper>
                 <S.RightWrapper>
                     <S.BlurImg src={Blur} />

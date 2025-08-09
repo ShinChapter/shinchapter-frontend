@@ -51,61 +51,9 @@ const CameraPage = () => {
         }
     }
 
-    const handlePhoto = async () => {
-        try {
-            setState("LOADING");
-            const blob = await (await fetch(image)).blob();
-            const formData = new FormData();
-            formData.append("file", blob, "photo.jpg");
-            const response = await axiosInstance.post('/character/create', formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            })
-            const receivedJobId = response?.data?.job_id;
-            if (receivedJobId) {
-                setJobId(receivedJobId);
-                console.log('사진 전송 성공, job_id:', receivedJobId);
-            } else {
-                console.warn('job_id가 응답에 없습니다.');
-            }
-        } catch (error) {
-            console.log('사진 전송 실패', error);
-            setState("NEXT");
-        }
+    const handlePhoto = () => {
+        navigate('/hair', { state: image });
     }
-
-    const handleStatus = async () => {
-        if (!jobId) return;
-
-        try {
-            const response = await axiosInstance.get(`/character/status/${jobId}`);
-            const result = response?.data;
-            console.log('캐릭터 생성 상태', result);
-            setStatus(result.status);
-
-            if (result.status === 'done') {
-                clearInterval(pollingRef.current);
-                navigate('/explanation', { state: { modelUrl: result.model_url } });
-            } else if (result.status === 'failed') {
-                clearInterval(pollingRef.current);
-                alert("캐릭터 생성에 실패했습니다. 다시 시도해주세요.");
-                setState("NEXT");
-            }
-        } catch (error) {
-            console.log('캐릭터 생성 상태 가져오기 실패', error);
-        }
-    }
-
-    useEffect(() => {
-        if (jobId) {
-            pollingRef.current = setInterval(handleStatus, 5000);
-        }
-
-        return () => {
-            if (pollingRef.current) {
-                clearInterval(pollingRef.current);
-            }
-        }
-    }, [jobId])
 
     return (
         <S.Wrapper>
@@ -141,7 +89,7 @@ const CameraPage = () => {
                     )}
                 </S.CameraWrapper>
                 {state === "LOADING" && (
-                    <img src={loading} />
+                    <S.Loading src={loading} />
                 )}
                 <Button text={state} onClick={state==="RECORD" ? handleRecord : handlePhoto}/>
             </Layout>

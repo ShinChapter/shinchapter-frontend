@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Camera from '../assets/icons/camera.png';
 import Album from '../assets/icons/album.png';
@@ -6,12 +6,38 @@ import Metaverse from '../assets/icons/metaverse.png';
 import Character from '../assets/images/character.png';
 import CircleLine from '../assets/images/circle-line.png';
 import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../apis/axiosInstance';
 
 const Profile = () => {
     const navigate = useNavigate();
 
     const [hasAlbum, setHasAlbum] = useState(false);
     const [name, setName] = useState('사용자');
+    const [characterImage, setCharacterImage] = useState();
+
+    const handleName = async () => {
+        try {
+            const response = await axiosInstance.get('/me');
+            setName(response.data.name);
+        } catch(error) {
+            console.log('이름 조회 실패', error);
+        }
+    }
+
+    const handleCharacter = async () => {
+        try {
+            const response = await axiosInstance.get('/character/my');
+            console.log('캐릭터 조회', response);
+            setCharacterImage(response.data.preview_url);
+        } catch(error) {
+            console.log('캐릭터 조회 실패', error);
+        }
+    }
+
+    useEffect(() => {
+        handleName();
+        handleCharacter();
+    }, [])
 
     return (
         <Wrapper>
@@ -35,7 +61,7 @@ const Profile = () => {
                 <ProfileBlur />
                 <CircleLineImg src={CircleLine}/>
                 <ProfileImg>
-                    <CharacterImg src={Character}/>
+                    <CharacterImg src={characterImage}/>
                 </ProfileImg>
             </ProfileWrapper>
             <NameWrapper>
