@@ -4,7 +4,8 @@ import { styled } from 'styled-components';
 export const Wrapper = styled.div`
     width: 100%;
     height: 100vh;
-    background-color: #3f3f3f;
+    background: #0b0f14;
+    overflow: hidden;
 `
 
 export const IconWrapper = styled.div`

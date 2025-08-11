@@ -75,6 +75,7 @@ export const Back = styled.div`
     height: 120px;
     position: absolute;
     top: 0;
+    cursor: pointer;
 `
 
 export const CheckIcon = styled.img`
