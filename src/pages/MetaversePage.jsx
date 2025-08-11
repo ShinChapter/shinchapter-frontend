@@ -5,6 +5,7 @@ import { PointerLockControls, Sky, Environment } from '@react-three/drei';
 import * as THREE from 'three';
 import { useNavigate } from 'react-router-dom';
 import Camera from '../assets/icons/camera2.png';
+import NoCamera from '../assets/icons/no-camera.png';
 import Change from '../assets/icons/change.png';
 import Up from '../assets/icons/up.png';
 import MiniSungshin from '../assets/images/mini-sungshin.png';
@@ -53,6 +54,10 @@ const MetaversePage = () => {
         <S.Wrapper>
             <Header />
             <S.IconWrapper>
+                <S.LocationWrapper>
+                    <S.BlurLayer />
+                    <S.Location>성신여자대학교 정문</S.Location>
+                </S.LocationWrapper>
                 <S.CameraIcon src={Camera} onClick={()=>navigate('/metaverse/camera')}/>
                 {/* Change 아이콘 */}
                 {!showBuildings && (

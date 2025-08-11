@@ -30,13 +30,15 @@ const HomePage = () => {
     const getInvite = async () => { // 초대 내역 모달을 보여주기 위한 함수
         try {
             const response = await axiosInstance.get('/group/invitations');
-            console.log('초대 내역 존재', response);
-            isHasInvite(true);
-            isGroupCreator(response.data.invited_by.name);
-        } catch(error) {
-            if (error.status===404) {
-                console.log('초대 내역 존재하지 않음');
+            if (response.data.length>0) {
+                console.log('초대 내역 존재', response);
+                isHasInvite(true);
+                isGroupCreator(response.data.invited_by.name);
+            } else {
+                console.log('초대 내역 없음', response);
+                isHasInvite(false);
             }
+        } catch(error) {
             console.log('초대 내역 확인 실패', error);
             isHasInvite(false);
         }
@@ -46,10 +48,13 @@ const HomePage = () => {
         console.log("현재 URL:", window.location.href);
         const params = new URLSearchParams(window.location.search);
         const token = params.get("token");
+        const storageToken = localStorage.getItem("token");
 
         if (token) {
             localStorage.setItem("token", token);
-            console.log("저장된 토그:", token);
+            console.log("저장된 토큰:", token);
+        } else if (storageToken) {
+            console.log("저장된 토큰 사용:", storageToken);
         } else {
             console.log("로그인 토큰이 없습니다. 다시 로그인 해주세요.");
             navigate("/login");

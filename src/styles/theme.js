@@ -32,6 +32,7 @@ export const theme = {
             "letter-spacing": "-0.025em",
         },
         Galmuri: fontGenerator('"Galmuri14"'),
+        Galmuri7: fontGenerator('"Galmuri7"'),
         IBMMedium: fontGenerator("IBMPlexSansKR-Medium"),
         IBMSemiBold: fontGenerator("IBMPlexSansKR-SemiBold"),
         IBMBold: fontGenerator("IBMPlexSansKR-Bold"),

@@ -8,27 +8,51 @@ export const Wrapper = styled.div`
     overflow: hidden;
 `
 
+export const LocationWrapper = styled.div`
+    position: relative;
+    height: 46px;
+    width: 330px;
+    margin-bottom: 30px;
+`
+
+export const BlurLayer = styled.div`
+    position: absolute;
+    inset: 0;
+    background-color: rgba(86, 23, 138, 0.66);
+    filter: blur(10px);
+    z-index: 0;
+`
+
+export const Location = styled.h3`
+    ${({ theme }) => theme.fonts.Galmuri7};
+    font-size: 32px;
+    color: #FFFFFF;
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    line-height: 46px;
+`
+
 export const IconWrapper = styled.div`
     position: absolute;
     top: 30px;
     right: 50px;
     z-index: 10;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     flex-direction: column;
-    width: 80px;
 `
 
 export const CameraIcon = styled.img`
-    width: 60px;
-    height: 60px;
+    width: 70px;
+    height: 70px;
     cursor: pointer;
     margin-bottom: 30px;
 `
 
 export const Icon = styled.img`
-    width: 60px;
-    height: 60px;
+    width: 70px;
+    height: 70px;
     cursor: pointer;
 `
 
@@ -40,7 +64,7 @@ export const DropdownIconWrapper = styled.div`
     flex-direction: column;
     border-radius: 10px;
     gap: 15px;
-    width: 80px;
+    width: 70px;
     padding: 18px 0;
 `
 
@@ -96,8 +120,8 @@ export const CameraIconWrapper = styled.div`
 `
 
 export const filmedImage = styled.div`
-    width: 80px;
-    height: 80px;
+    width: 70px;
+    height: 70px;
     position: relative;
 `
 

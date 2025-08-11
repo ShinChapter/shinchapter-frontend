@@ -52,6 +52,7 @@ const Friend = () => {
             isHasGroup(true);
             setGroupId(response.data.group_id);
             setMode('invite');
+            setGroupName("");
         } catch(error) {
             console.log('그룹 생성 실패', error);
             setMode('list');
