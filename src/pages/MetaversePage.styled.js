@@ -11,7 +11,7 @@ export const Wrapper = styled.div`
 export const LocationWrapper = styled.div`
     position: relative;
     height: 46px;
-    width: 330px;
+    width: 340px;
     margin-bottom: 30px;
 `
 
@@ -19,8 +19,8 @@ export const BlurLayer = styled.div`
     position: absolute;
     inset: 0;
     background-color: rgba(86, 23, 138, 0.66);
-    filter: blur(10px);
-    z-index: 0;
+    filter: blur(15px);
+    border-radius: 50%;
 `
 
 export const Location = styled.h3`

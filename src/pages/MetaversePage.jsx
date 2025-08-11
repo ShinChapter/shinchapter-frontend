@@ -48,6 +48,7 @@ const MetaversePage = () => {
     
     const [moveTo, setMoveTo] = useState(null);
     const [showBuildings, setShowBuildings] = useState(false);
+    const [location, setLocation] = useState("성신여자대학교 정문");
     const navigate = useNavigate();
 
     return (
@@ -56,9 +57,13 @@ const MetaversePage = () => {
             <S.IconWrapper>
                 <S.LocationWrapper>
                     <S.BlurLayer />
-                    <S.Location>성신여자대학교 정문</S.Location>
+                    <S.Location>{location}</S.Location>
                 </S.LocationWrapper>
-                <S.CameraIcon src={Camera} onClick={()=>navigate('/metaverse/camera')}/>
+                <S.CameraIcon
+                    src={location!=="성신여자대학교 안" ? Camera : NoCamera}
+                    onClick={location!=="성신여자대학교 안" ? () => navigate('/metaverse/camera') : undefined}
+                    style={{ cursor: location!=="성신여자대학교 안" ? "pointer" : "default" }}
+                />
                 {/* Change 아이콘 */}
                 {!showBuildings && (
                     <S.Icon
@@ -133,6 +138,9 @@ const MetaversePage = () => {
                     eyeHeight={8.0}
                     maxSlopeDeg={50}
                     moveTo={moveTo}
+                    onLocationChange={(name) => {
+                        if (name) setLocation(name);
+                    }}
                 />
                 <PointerLockControls />
             </Canvas>

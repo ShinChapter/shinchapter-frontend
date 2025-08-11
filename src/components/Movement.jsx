@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
-export default function Movement({ colliders, speed = 6, eyeHeight = 8.0, maxSlopeDeg = 50, moveTo }) {
+export default function Movement({ colliders, speed = 6, eyeHeight = 8.0, maxSlopeDeg = 50, moveTo, onLocationChange }) {
     const { camera } = useThree();
     const keys = useRef({ f: false, b: false, l: false, r: false });
     const raycaster = useMemo(() => new THREE.Raycaster(), []);
@@ -15,6 +15,25 @@ export default function Movement({ colliders, speed = 6, eyeHeight = 8.0, maxSlo
     }), []);
 
     const lastLogTime = useRef(0);
+
+    const getBuildingName = (pos) => {
+        const { x, y, z } = pos;
+
+        // 건물 위치 반환
+        if (x >= -20 && x <= 25 && Math.abs(y - 4.0) < 5 && z >= 5 && z <= 20)
+            return "성신여자대학교 정문";
+
+        if (x >= 20 && x <= 40 && Math.abs(y - 18.0) < 5 && z >= -55 && z <= -30)
+            return "성신여자대학교 도서관";
+
+        if (x >= -42 && x <= -35 && Math.abs(y - 28.5) < 5 && z >= -150 && z <= -80)
+            return "성신여자대학교 성신관";
+
+        if (x >= -45 && x <= 2 && Math.abs(y - 28.5) < 5 && z >= -165 && z <= -150)
+            return "성신여자대학교 수정관";
+
+        return "성신여자대학교 안";
+    };
 
     // 키 입력
     useEffect(() => {
@@ -109,6 +128,11 @@ export default function Movement({ colliders, speed = 6, eyeHeight = 8.0, maxSlo
             } else {
                 camera.position.copy(next);
             }
+        }
+
+        const buildingName = getBuildingName(camera.position);
+        if (onLocationChange) {
+            onLocationChange(buildingName);
         }
 
         if (state.clock.elapsedTime - lastLogTime.current > 1) {
