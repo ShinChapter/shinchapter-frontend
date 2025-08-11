@@ -158,8 +158,8 @@ export const PoseIcon = styled.img`
     cursor: pointer;
     border-radius: 10px;
     border: 2px solid #FFFFFF;
-    width: 70px;
-    height: 70px;
+    width: 60px;
+    height: 60px;
     padding: 5px;
 
     &:hover {

@@ -33,7 +33,7 @@ export const Character = styled.img`
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    height: 100%;
+    height: 90%;
     z-index: 2;
 `
 

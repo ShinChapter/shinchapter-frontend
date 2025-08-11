@@ -138,9 +138,8 @@ const MetaversePage = () => {
                     eyeHeight={8.0}
                     maxSlopeDeg={50}
                     moveTo={moveTo}
-                    onLocationChange={(name) => {
-                        if (name) setLocation(name);
-                    }}
+                    onLocationChange={(name) => { if (name) setLocation(name); }}
+                    storageKey="Metaverse"
                 />
                 <PointerLockControls />
             </Canvas>

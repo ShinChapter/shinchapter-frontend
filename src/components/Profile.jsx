@@ -34,9 +34,23 @@ const Profile = () => {
         }
     }
 
+    const handleAlbum = async () => {
+        try {
+            const response = await axiosInstance.get('/album/final-list');
+            if (response.data.images > 0) {
+                setHasAlbum(true);
+            } else {
+                setHasAlbum(false);
+            }
+        } catch(error) {
+            console.log('앨범 조회 실패', error.response);
+        }
+    }
+
     useEffect(() => {
         handleName();
         handleCharacter();
+        handleAlbum();
     }, [])
 
     return (
@@ -124,13 +138,14 @@ const ProfileImg = styled.div`
     border-radius: 50%;
     margin-bottom: 30px;
     position: relative;
+    overflow: hidden;
 `
 
 const CharacterImg = styled.img`
     border-radius: 50%;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: none;
     object-position: top;
     border: 2px solid ${({ theme }) => theme.colors.mainColor};
 `

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
-export default function Movement({ colliders, speed = 6, eyeHeight = 8.0, maxSlopeDeg = 50, moveTo, onLocationChange }) {
+export default function Movement({ colliders, speed = 6, eyeHeight = 8.0, maxSlopeDeg = 50, moveTo, onLocationChange, storageKey = "cameraPosition" }) {
     const { camera } = useThree();
     const keys = useRef({ f: false, b: false, l: false, r: false });
     const raycaster = useMemo(() => new THREE.Raycaster(), []);
@@ -76,20 +76,54 @@ export default function Movement({ colliders, speed = 6, eyeHeight = 8.0, maxSlo
             if (moveTo.lookAt) {
                 camera.lookAt(moveTo.lookAt);
             }
+            sessionStorage.setItem(`${storageKey}Position`, JSON.stringify({
+                x: moveTo.position.x,
+                y: moveTo.position.y,
+                z: moveTo.position.z,
+            }));
+            sessionStorage.setItem(`${storageKey}Direction`, JSON.stringify({
+                x: moveTo.lookAt.x - moveTo.position.x,
+                y: moveTo.lookAt.y - moveTo.position.y,
+                z: moveTo.lookAt.z - moveTo.position.z,
+            }));
         }
-    }, [moveTo, camera]);
+    }, [moveTo, camera, storageKey]);
 
     // 시작 위치
     useEffect(() => {
-        const initialPosition = new THREE.Vector3(-0.34, 4.0, 12.15);
-        const initialLookAt = new THREE.Vector3(-0.36, 3.98, 11.15);
+        const savedPos = sessionStorage.getItem(`${storageKey}Position`);
+        const savedDir = sessionStorage.getItem(`${storageKey}Direction`);
 
-        camera.position.copy(initialPosition);
-        camera.lookAt(initialLookAt);
-    }, [camera]);
+        if (savedPos && savedDir) {
+            const pos = JSON.parse(savedPos);
+            const dir = JSON.parse(savedDir);
+            camera.position.set(pos.x, pos.y, pos.z);
+            const lookAtVec = new THREE.Vector3(pos.x + dir.x, pos.y + dir.y, pos.z + dir.z);
+            camera.lookAt(lookAtVec);
+        } else {
+            const initialPosition = new THREE.Vector3(-0.34, 4.0, 12.15);
+            const initialLookAt = new THREE.Vector3(-0.36, 3.98, 11.15);
+            camera.position.copy(initialPosition);
+            camera.lookAt(initialLookAt);
+        }
+    }, [camera, storageKey]);
 
     useFrame((state, dt) => {
         const { mv, next, normal, normalMatrix } = tmp;
+
+        sessionStorage.setItem(`${storageKey}Position`, JSON.stringify({
+            x: camera.position.x,
+            y: camera.position.y,
+            z: camera.position.z
+        }));
+
+        const direction = new THREE.Vector3();
+        camera.getWorldDirection(direction);
+        sessionStorage.setItem(`${storageKey}Direction`, JSON.stringify({
+            x: direction.x,
+            y: direction.y,
+            z: direction.z
+        }));
 
         mv.set(
             (keys.current.r ? 1 : 0) + (keys.current.l ? -1 : 0),
@@ -140,12 +174,12 @@ export default function Movement({ colliders, speed = 6, eyeHeight = 8.0, maxSlo
             camera.getWorldDirection(direction);
             const lookAtPosition = camera.position.clone().add(direction);
 
-            console.log(
-                `현재 위치: (${camera.position.x.toFixed(2)}, ${camera.position.y.toFixed(2)}, ${camera.position.z.toFixed(2)})`
-            );
-            console.log(
-                `바라보는 좌표: (${lookAtPosition.x.toFixed(2)}, ${lookAtPosition.y.toFixed(2)}, ${lookAtPosition.z.toFixed(2)})`
-            );
+            // console.log(
+            //     `현재 위치: (${camera.position.x.toFixed(2)}, ${camera.position.y.toFixed(2)}, ${camera.position.z.toFixed(2)})`
+            // );
+            // console.log(
+            //     `바라보는 좌표: (${lookAtPosition.x.toFixed(2)}, ${lookAtPosition.y.toFixed(2)}, ${lookAtPosition.z.toFixed(2)})`
+            // );
 
             lastLogTime.current = state.clock.elapsedTime;
         }

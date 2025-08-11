@@ -1,4 +1,4 @@
-import React, { Suspense, useState, useCallback } from 'react';
+import React, { Suspense, useState, useCallback, useRef, useEffect } from 'react';
 import * as S from './MetaversePage.styled';
 import { Canvas } from '@react-three/fiber';
 import { PointerLockControls, Sky, Environment } from '@react-three/drei';
@@ -13,11 +13,11 @@ import Close from '../assets/icons/close.png';
 import Pose1 from '../assets/images/pose1.png';
 import Pose2 from '../assets/images/pose2.png';
 import Pose3 from '../assets/images/pose3.png';
-import { Photos } from '../constant/photoData';
 import { useNavigate } from 'react-router-dom';
 import Ground from '../components/Ground';
 import UniversityModel from '../components/UniversityModel';
 import Movement from './../components/Movement';
+import axiosInstance from './../apis/axiosInstance';
 
 const BUILDING_TARGETS = {
     성신관: {
@@ -41,21 +41,68 @@ const BUILDING_IMAGES = {
 };
 
 const MetaverseCameraPage = () => {
+    const navigate = useNavigate();
     const [colliders, setColliders] = useState([]);
     const onLoaded = useCallback((meshes) => setColliders(meshes), []);
     const registerCollider = useCallback((obj) => {
         if (!obj) return;
-            setColliders(prev => (prev.includes(obj) ? prev : [...prev, obj]));
+        setColliders(prev => (prev.includes(obj) ? prev : [...prev, obj]));
     }, []);
 
     const [moveTo, setMoveTo] = useState(null);
     const [showPoses, setShowPoses] = useState(false);
-    const navigate = useNavigate();
+    const [photos, setPhotos] = useState([]);
+
+    // canvas를 담을 ref
+    const canvasWrapperRef = useRef(null);
+    const canvasRef = useRef(null);
+
+    // 캔버스가 렌더된 후에 실제 <canvas> 요소를 찾아서 저장
+    useEffect(() => {
+        if (canvasWrapperRef.current) {
+            const canvasElement = canvasWrapperRef.current.querySelector('canvas');
+            if (canvasElement) {
+                canvasRef.current = canvasElement;
+            } else {
+                canvasRef.current = null;
+            }
+        }
+    }, []);
+
+    const handleShoot = async () => {
+        if (!canvasRef.current) {
+            alert('캔버스를 찾을 수 없습니다.');
+            return;
+        }
+
+        const canvas = canvasRef.current;
+        const dataURL = canvas.toDataURL('image/png');
+        const blob = await (await fetch(dataURL)).blob();
+
+        const formData = new FormData();
+        formData.append('files', blob, 'capture.png');
+
+        try {
+            const response = await axiosInstance.post('/album/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            console.log('사진 업로드 성공', response.data);
+
+            if (response.data.files && response.data.files.length > 0) {
+                setPhotos(prev => [...prev, ...response.data.files]);
+            } else {
+                setPhotos(prev => [...prev, dataURL]);
+            }
+        } catch (error) {
+            console.error('사진 업로드 실패', error);
+            alert('사진 업로드에 실패했습니다.');
+        }
+    };
 
     return (
         <S.PhotoWrapper>
-            <S.PhotoCanvas>
-                {/* 3D */}
+            {/* 캔버스 감싸는 div에 ref 걸기 */}
+            <S.PhotoCanvas ref={canvasWrapperRef}>
                 <Canvas
                     shadows
                     dpr={[1, 2]}
@@ -73,66 +120,52 @@ const MetaverseCameraPage = () => {
                         gl.outputColorSpace = THREE.SRGBColorSpace;
                     }}
                 >
-                    {/* 하늘과 안개 */}
                     <fog attach="fog" args={['#6e81a4ff', 80, 1600]} />
                     <Sky distance={450000} sunPosition={[100, 200, 100]} turbidity={6} rayleigh={2} />
                     <Environment preset="city" />
-                    {/* 라이트 */}
                     <hemisphereLight intensity={0.6} />
                     <directionalLight position={[10, 15, 5]} intensity={1.4} castShadow />
-                    {/* 바닥 */}
                     <Ground y={0} size={4000} registerCollider={registerCollider} />
-                    {/* 모델 */}
                     <Suspense fallback={null}>
                         <UniversityModel onLoaded={onLoaded} />
                     </Suspense>
-                    {/* 이동 */}
                     <Movement
                         colliders={colliders}
                         speed={6}
                         eyeHeight={8.0}
                         maxSlopeDeg={50}
                         moveTo={moveTo}
+                        storageKey="Metaverse"
                     />
                     <PointerLockControls />
                 </Canvas>
             </S.PhotoCanvas>
+
             <S.ColumnIconWrapper>
-                <S.CloseIcon src={Close} onClick={() => navigate('/metaverse')}/>
+                <S.CloseIcon src={Close} onClick={() => navigate('/metaverse')} />
                 <S.CameraIconWrapper>
                     {showPoses ? (
                         <S.DropdownIconWrapper>
-                            <S.UpIcon
-                                src={Up}
-                                alt="Up"
-                                onClick={() => setShowPoses(false)}
-                            />
-                            <S.PoseIcon
-                                src={Pose1}
-                            />
-                            <S.PoseIcon
-                                src={Pose2}
-                            />
-                            <S.PoseIcon
-                                src={Pose3}
-                            />
+                            <S.UpIcon src={Up} alt="Up" onClick={() => setShowPoses(false)} />
+                            <S.PoseIcon src={Pose1} />
+                            <S.PoseIcon src={Pose2} />
+                            <S.PoseIcon src={Pose3} />
                         </S.DropdownIconWrapper>
                     ) : (
                         <>
-                            <S.Icon src={Shoot} onClick={() => {}}/> {/* 사진 찍기 버튼 */}
-                            <S.Icon src={Change} onClick={() => setShowPoses(true)}/> {/* 포즈 바꾸기 버튼 */}
+                            {/* 사진 촬영 버튼 */}
+                            <S.Icon src={Shoot} onClick={handleShoot} />
+                            {/* 포즈 변경 버튼 */}
+                            <S.Icon src={Change} onClick={() => setShowPoses(true)} />
                             <S.filmedImage>
-                                {Photos.length > 0 ? (
-                                    // 사진 미리보기
+                                {photos.length > 0 ? (
                                     <>
-                                        <S.PreviewImage src={Photos[Photos.length-1]}/>
-                                        <S.ImageNum>{Photos.length}</S.ImageNum>
+                                        <S.PreviewImage src={photos[photos.length - 1]} />
+                                        <S.ImageNum>{photos.length}</S.ImageNum>
                                     </>
                                 ) : (
-                                    // 어두운 화면
                                     <S.EmptyImage />
-                                )
-                            }
+                                )}
                             </S.filmedImage>
                         </>
                     )}
