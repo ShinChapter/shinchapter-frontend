@@ -23,8 +23,8 @@ const HairPage = () => {
     const [jobId, setJobId] = useState(null);
     const pollingRef = useRef(null);
 
-    const colors = ['#000000', '#C7B372', '#98636A', '#47578A', '#8C5B3E'];
-    const colorNames = ['검정', '노랑', '빨강', '파랑', '갈색'];
+    const colors = ['#000000', '#C7B372', '#c41a30', '#47578A', '#ce4c80'];
+    const colorNames = ['검정', '노랑', '빨강', '파랑', '핑크'];
 
     const styles = [
         { name: '긴생머리', img: LongHair },
@@ -34,15 +34,6 @@ const HairPage = () => {
         { name: '버섯머리', img: MushroomHair },
         { name: '긴 웨이브', img: WaveHair },
     ]
-
-    const getColor = async () => {
-        try {
-            const response = await axiosInstance.get('/character/hair/options');
-            console.log('헤어 종류', response.data);
-        } catch(error) {
-            console.log('헤어 종류 에러', error);
-        }
-    }
 
     // 캐릭터 생성
     const handleCharacter = async () => {
@@ -113,10 +104,6 @@ const HairPage = () => {
             }
         };
     }, [jobId]);
-
-    useEffect(() => {
-        getColor();
-    }, [])
     
     return (
         <S.Wrapper>

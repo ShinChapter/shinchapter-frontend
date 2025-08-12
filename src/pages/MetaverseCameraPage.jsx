@@ -101,7 +101,6 @@ const MetaverseCameraPage = () => {
 
     return (
         <S.PhotoWrapper>
-            {/* 캔버스 감싸는 div에 ref 걸기 */}
             <S.PhotoCanvas ref={canvasWrapperRef}>
                 <Canvas
                     shadows

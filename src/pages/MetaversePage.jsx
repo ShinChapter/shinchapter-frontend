@@ -16,6 +16,8 @@ import Button from '../components/Button';
 import Ground from '../components/Ground';
 import UniversityModel from '../components/UniversityModel';
 import Movement from './../components/Movement';
+import HumanModel from '../components/HumanModel';
+import axiosInstance from '../apis/axiosInstance';
 
 const BUILDING_TARGETS = {
     성신관: {
@@ -38,6 +40,13 @@ const BUILDING_IMAGES = {
     도서관: MiniLibrary,
 };
 
+const humanData = {
+    glb: 'http://3.35.186.32:8000/download/merged_3e0b445f-a3d2-403f-b415-3acdcaac532e_flower.glb',
+    x: -3.72,
+    y: 4.0,
+    z: 6.42
+};
+
 const MetaversePage = () => {
     const [colliders, setColliders] = useState([]);
     const onLoaded = useCallback((meshes) => setColliders(meshes), []);
@@ -50,6 +59,19 @@ const MetaversePage = () => {
     const [showBuildings, setShowBuildings] = useState(false);
     const [location, setLocation] = useState("성신여자대학교 정문");
     const navigate = useNavigate();
+
+    const handlePhotoCount = async () => {
+        try {
+            const response = await axiosInstance.get('/album/list');
+            if (response.data.images.length < 5) {
+                alert('사진을 5장 이상 촬영해주세요.')
+            } else {
+                navigate('/selection');
+            }
+        } catch(error) {
+            console.log('사진 목록 조회 실패', error.response);
+        }
+    }
 
     return (
         <S.Wrapper>
@@ -130,6 +152,10 @@ const MetaversePage = () => {
                 {/* 모델 */}
                 <Suspense fallback={null}>
                     <UniversityModel onLoaded={onLoaded} />
+                    <HumanModel
+                        url={humanData.glb}
+                        position={[humanData.x, humanData.y, humanData.z]}
+                    />
                 </Suspense>
                 {/* 이동 */}
                 <Movement
@@ -143,7 +169,7 @@ const MetaversePage = () => {
                 />
                 <PointerLockControls />
             </Canvas>
-            <S.ButtonWrapper onClick={() => navigate('/selection')}>
+            <S.ButtonWrapper onClick={handlePhotoCount}>
                 <Button text="NEXT"/>
             </S.ButtonWrapper>
         </S.Wrapper>

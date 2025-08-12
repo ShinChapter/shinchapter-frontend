@@ -1,17 +1,29 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as S from './SelectionPage.styled';
 import PurpleBackground from '../assets/images/purple-background.png';
 import Header from '../components/Header';
 import Button from '../components/Button';
-import { TotalPhotos } from './../constant/totalPhotoData';
 import Check from '../assets/icons/check.png';
 import Expansion from '../assets/icons/expansion,.png';
 import Back from '../assets/icons/back.png';
+import axiosInstance from './../apis/axiosInstance';
 
 const SelectionPage = () => {
+    const [totalPhoto, setTotalPhoto] = useState([]);
     const [selectedPhotos, setSelectedPhotos] = useState([]);
     const [previewImage, setPreviewImage] = useState(null); // 확대된 이미지
     const [isPreviewOpen, setIsPreviewOpen] = useState(false); // 확대된 이미지가 존재하는지
+
+    const handlePhoto = async () => {
+        try {
+            const response = await axiosInstance.get('/album/list');
+            console.log('촬영된 사진', response.data);
+            setTotalPhoto(response.data.images || []);
+        } catch (error) {
+            console.log('촬영된 사진 가져오기 실패', error.response);
+            setTotalPhoto([]);
+        }
+    };
 
     const handleSelectPhoto = (index) => {
         setSelectedPhotos((prev) => {
@@ -22,6 +34,25 @@ const SelectionPage = () => {
                 return [...prev, index];
             }
         })
+    }
+
+    const sendSelectedPhoto = async () => {
+        if (selectedPhotos.length !== 5) {
+            alert('사진 5장을 선택해주세요.');
+            return;
+        }
+        try {
+            const formData = FormData();
+            selectedPhotos.forEach((index) => {
+                formData.append('files', totalPhoto[index]);
+            });
+            const response = await axiosInstance.post('/album/save-selected', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            console.log('앨범에 넣을 사진', response.data);
+        } catch(error) {
+            console.log('앨범에 넣을 사진 전송 실패', error.response);
+        }
     }
 
     const handlePreviewOpen = (event, photo) => {
@@ -35,6 +66,10 @@ const SelectionPage = () => {
         setPreviewImage(null);
     }
 
+    useEffect(() => {
+        handlePhoto();
+    }, [])
+
     return (
         <S.Wrapper backgroundImageUrl={PurpleBackground}>
             <Header />
@@ -46,7 +81,7 @@ const SelectionPage = () => {
                 {/* 전체 이미지 + 스크롤 넣기 */}
                 <S.ImageWrapperContainer>
                     <S.TotalImageWrapper>
-                        {TotalPhotos.map((photo, index) => {
+                        {totalPhoto.map((photo, index) => {
                             const isSelected = selectedPhotos.includes(index);
                             return (
                                 <S.PhotoWrapper 
@@ -79,13 +114,13 @@ const SelectionPage = () => {
                 <S.ChoosenStatus>{selectedPhotos.length}/5</S.ChoosenStatus>
                 <S.ChoosenPhotoWrapper>
                     {selectedPhotos.map((index) => (
-                        <S.ChoosenPhoto key={index} src={TotalPhotos[index]} />
+                        <S.ChoosenPhoto key={index} src={totalPhoto[index]} />
                     ))}
                     {Array(5 - selectedPhotos.length).fill().map((_, idx) => (
                         <S.NoPhoto key={`empty-${idx}`} />
                     ))}
                 </S.ChoosenPhotoWrapper>
-                <Button text="DONE"/>
+                <Button text="DONE" onPress={sendSelectedPhoto}/>
             </S.ChoosenWrapper>
             {isPreviewOpen && (
                 <S.PreviewWrapper>

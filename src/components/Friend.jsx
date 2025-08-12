@@ -35,6 +35,7 @@ const Friend = () => {
 
     const handleMode = () => {
         if (hasGroup) {
+            setFriendStudentNumber('');
             setMode('invite');
         } else {
             setMode('group');
@@ -51,8 +52,8 @@ const Friend = () => {
             setGroupName('');
             isHasGroup(true);
             setGroupId(response.data.group_id);
-            setMode('invite');
             setFriendStudentNumber('');
+            setMode('invite');
         } catch(error) {
             console.log('그룹 생성 실패', error);
             setMode('list');
@@ -97,6 +98,7 @@ const Friend = () => {
                 <TopWrapper>
                     <Category>그룹명: </Category>
                     <Input 
+                        value={groupName}
                         onChange={(event)=>setGroupName(event.target.value)}
                     />
                     <SendIconWrapper onClick={handleGroupName}>
@@ -106,7 +108,8 @@ const Friend = () => {
             ) : (
                 <TopWrapper>
                     <Category>학번: </Category>
-                    <Input 
+                    <Input2
+                        value={friendStudentNumber}
                         onChange={(event)=>setFriendStudentNumber(event.target.value)}
                     />
                     <SendIconWrapper onClick={handleGroupMember}>
@@ -183,6 +186,19 @@ const Icon = styled.img`
 `
 
 const Input = styled.input`
+    border: 1px solid #FFFFFF;
+    border-top: none;
+    border-right: none;
+    border-left: none;
+    background: none;
+    color: #FFFFFF;
+    ${({ theme }) => theme.fonts.PressStart2P};
+    width: 200px;
+    height: 70%;
+    font-size: 20px;
+`
+
+const Input2 = styled.input`
     border: 1px solid #FFFFFF;
     border-top: none;
     border-right: none;

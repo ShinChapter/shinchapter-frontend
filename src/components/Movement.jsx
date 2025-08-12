@@ -174,12 +174,12 @@ export default function Movement({ colliders, speed = 6, eyeHeight = 8.0, maxSlo
             camera.getWorldDirection(direction);
             const lookAtPosition = camera.position.clone().add(direction);
 
-            // console.log(
-            //     `현재 위치: (${camera.position.x.toFixed(2)}, ${camera.position.y.toFixed(2)}, ${camera.position.z.toFixed(2)})`
-            // );
-            // console.log(
-            //     `바라보는 좌표: (${lookAtPosition.x.toFixed(2)}, ${lookAtPosition.y.toFixed(2)}, ${lookAtPosition.z.toFixed(2)})`
-            // );
+            console.log(
+                `현재 위치: (${camera.position.x.toFixed(2)}, ${camera.position.y.toFixed(2)}, ${camera.position.z.toFixed(2)})`
+            );
+            console.log(
+                `바라보는 좌표: (${lookAtPosition.x.toFixed(2)}, ${lookAtPosition.y.toFixed(2)}, ${lookAtPosition.z.toFixed(2)})`
+            );
 
             lastLogTime.current = state.clock.elapsedTime;
         }

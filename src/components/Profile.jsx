@@ -139,15 +139,15 @@ const ProfileImg = styled.div`
     margin-bottom: 30px;
     position: relative;
     overflow: hidden;
+    border: 2px solid ${({ theme }) => theme.colors.mainColor};
 `
 
 const CharacterImg = styled.img`
     border-radius: 50%;
     width: 100%;
     height: 100%;
-    object-fit: none;
-    object-position: top;
-    border: 2px solid ${({ theme }) => theme.colors.mainColor};
+    scale: 2.5;
+    transform-origin: top;
 `
 
 const NameWrapper = styled.div`
