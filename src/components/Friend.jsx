@@ -20,9 +20,13 @@ const Friend = ({ refreshFlag, myName }) => {
     const getGroup = async () => {
         try {
             const response = await axiosInstance.get('/album-group/my');
-            setGroupMember(response.data.members);
             console.log('그룹 존재함', response.data);
             isHasGroup(true);
+            setGroupId(response.data.group_id);
+            console.log('그룹 생성자 이름', response.data.members[0].name);
+            console.log('내 이름', myName);
+            handleGroupList(response.data.group_id);
+            
             if (response.data.members[0].name===myName) {
                 setGroupCreator(true);
             } else {
@@ -87,6 +91,20 @@ const Friend = ({ refreshFlag, myName }) => {
         }
     }
 
+    const handleGroupList = async (groupId) => {
+        try {
+            const response = await axiosInstance.get(`/group/${groupId}`);
+            console.log('handleGroupList 성공', response.data);
+            setGroupMember(response.data.members);
+        } catch(error) {
+            console.log('handleGroupList 실패', error.response);
+        }
+    }
+
+    useEffect(() => {
+        getGroup();
+    }, [])
+
     useEffect(() => {
         getGroup();
     }, [refreshFlag]);
@@ -135,7 +153,7 @@ const Friend = ({ refreshFlag, myName }) => {
                         .map((friend, index) => (
                             <Member key={friend.id}>
                                 <MemberBackground style={{ backgroundColor: colors[index % colors.length] }}>
-                                    <MembeImg src={Character}/>
+                                    <MembeImg src={friend.preview_url}/>
                                 </MemberBackground>
                                 <MemberName>{friend.name}</MemberName>
                             </Member>
@@ -264,14 +282,17 @@ const MemberBackground = styled.div`
     width: 120px;
     height: 150px;
     border-radius: 20px;
+    overflow: hidden;
+    padding-top: 10px;
 `
 
 const MembeImg = styled.img`
-    width: 120px;
-    height: 150px;
+    width: 100%;
+    height: 100%;
     border-radius: 20px;
     object-fit: cover;
-    object-position: top;
+    scale: 2.5;
+    transform-origin: top;
 `
 
 const MemberName = styled.p`
