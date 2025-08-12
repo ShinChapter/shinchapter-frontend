@@ -4,12 +4,12 @@ import UserPlus from '../assets/icons/user-plus.png';
 import Send from '../assets/icons/send.png';
 import Line from '../assets/images/line2.png';
 import Character from '../assets/images/character.png';
-import { FriendData } from '../constant/friendData';
 import axiosInstance from './../apis/axiosInstance';
 
-const Friend = () => {
+const Friend = ({ refreshFlag, myName }) => {
     const [mode, setMode] = useState('list'); // list, group, invite 중 하나
     const [hasGroup, isHasGroup] = useState(false);
+    const [groupCreator, setGroupCreator] = useState(false);
     const [groupName, setGroupName] = useState('');
     const [groupId, setGroupId] = useState();
     const [friendStudentNumber, setFriendStudentNumber] = useState();
@@ -20,15 +20,26 @@ const Friend = () => {
     const getGroup = async () => {
         try {
             const response = await axiosInstance.get('/album-group/my');
-            setGroupMember(response.data.members);
             console.log('그룹 존재함', response.data);
             isHasGroup(true);
+            setGroupId(response.data.group_id);
+            console.log('그룹 생성자 이름', response.data.members[0].name);
+            console.log('내 이름', myName);
+            handleGroupList(response.data.group_id);
+            
+            if (response.data.members[0].name===myName) {
+                setGroupCreator(true);
+            } else {
+                setGroupCreator(false);
+            }
         } catch(error) {
             if (error.status===404) {
                 isHasGroup(false);
                 console.log('그룹 없음');
+                setGroupCreator(true);
             } else {
                 console.log('내 그룹 목록 조회 실패', error.response);
+                setGroupCreator(true);
             }
         }
     }
@@ -80,18 +91,34 @@ const Friend = () => {
         }
     }
 
+    const handleGroupList = async (groupId) => {
+        try {
+            const response = await axiosInstance.get(`/group/${groupId}`);
+            console.log('handleGroupList 성공', response.data);
+            setGroupMember(response.data.members);
+        } catch(error) {
+            console.log('handleGroupList 실패', error.response);
+        }
+    }
+
     useEffect(() => {
         getGroup();
     }, [])
+
+    useEffect(() => {
+        getGroup();
+    }, [refreshFlag]);
     
     return (
         <Wrapper>
             {mode==="list" ? (
                 <TopWrapper>
                     <Title>FRIENDS</Title>
-                    <UserIconWrapper onClick={handleMode}>
-                        <Icon src={UserPlus} />
-                    </UserIconWrapper>
+                    {groupCreator && (
+                        <UserIconWrapper onClick={handleMode}>
+                            <Icon src={UserPlus} />
+                        </UserIconWrapper>
+                    )}
                 </TopWrapper>
             ) : 
             mode==="group" ? (
@@ -121,16 +148,17 @@ const Friend = () => {
                 <LineImg1 src={Line} />
                 <LineImg2 src={Line} />
                 <FriendList>
-                    {groupMember.map((friend, index) => (
-                        (index!==0 && friend.accepted) && (
-                            <Member>
+                    {groupMember
+                        .filter(friend => friend.accepted && friend.name !== myName)
+                        .map((friend, index) => (
+                            <Member key={friend.id}>
                                 <MemberBackground style={{ backgroundColor: colors[index % colors.length] }}>
-                                    <MembeImg src={Character}/>
+                                    <MembeImg src={friend.preview_url}/>
                                 </MemberBackground>
                                 <MemberName>{friend.name}</MemberName>
                             </Member>
-                        )
-                    ))}
+                        ))
+                    }
                 </FriendList>
             </FriendListWrapper>
         </Wrapper>
@@ -254,14 +282,17 @@ const MemberBackground = styled.div`
     width: 120px;
     height: 150px;
     border-radius: 20px;
+    overflow: hidden;
+    padding-top: 10px;
 `
 
 const MembeImg = styled.img`
-    width: 120px;
-    height: 150px;
+    width: 100%;
+    height: 100%;
     border-radius: 20px;
     object-fit: cover;
-    object-position: top;
+    scale: 2.5;
+    transform-origin: top;
 `
 
 const MemberName = styled.p`

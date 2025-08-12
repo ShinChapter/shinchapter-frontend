@@ -1,8 +1,23 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import axiosInstance from '../apis/axiosInstance';
 
-const Modal = ({ name, characterImage }) => {
+const Modal = ({ name, characterImage, groupId, onClose }) => {
 
+    const handleRespond = async (accept) => {
+        try {
+            const response = await axiosInstance.post('/group/respond', {
+                group_id: groupId,
+                accept: accept
+            });
+            console.log('그룹 초대 응답', response.data.message);
+            if (onClose) onClose();
+        } catch(error) {
+            console.log('그룹 초대 응답 실패', error.response);
+            if (onClose) onClose();
+        }
+    }
+    
     return (
         <Wrapper>
             <ProfileWrapper>
@@ -12,8 +27,8 @@ const Modal = ({ name, characterImage }) => {
                 {name}님이 그룹에 초대하였습니다.
             </Text>
             <ButtonWrapper>
-                <RejectButton>거절</RejectButton>
-                <AcceptButton>수락</AcceptButton>
+                <RejectButton onClick={() => handleRespond(false)}>거절</RejectButton>
+                <AcceptButton onClick={() => handleRespond(true)}>수락</AcceptButton>
             </ButtonWrapper>
         </Wrapper>
     )

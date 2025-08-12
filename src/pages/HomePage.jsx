@@ -15,8 +15,22 @@ import axiosInstance from '../apis/axiosInstance';
 const HomePage = () => {
     const navigate = useNavigate();
 
+    const [myName, setMyName] = useState();
     const [hasInvite, isHasInvite] = useState(false);
     const [groupCreator, isGroupCreator] = useState();
+    const [groupId, setGroupId] = useState();
+
+    const [refreshGroupFlag, setRefreshGroupFlag] = useState(false);
+    const refreshGroup = () => setRefreshGroupFlag(prev => !prev);
+
+    const handleName = async () => {
+        try {
+            const response = await axiosInstance.get('/me');
+            setMyName(response.data.name);
+        } catch(error) {
+            console.log('이름 조회 실패', error);
+        }
+    }
 
     const getCharacter = async () => {
         try {
@@ -31,9 +45,10 @@ const HomePage = () => {
         try {
             const response = await axiosInstance.get('/group/invitations');
             if (response.data.length>0) {
-                console.log('초대 내역 존재', response);
+                console.log('초대 내역 존재', response.data[0]);
                 isHasInvite(true);
-                isGroupCreator(response.data.invited_by.name);
+                isGroupCreator(response.data[0].invited_by.name);
+                setGroupId(response.data[0].group_id);
             } else {
                 console.log('초대 내역 없음', response);
                 isHasInvite(false);
@@ -62,6 +77,7 @@ const HomePage = () => {
     }, [navigate]);
 
     useEffect(() => {
+        handleName();
         getCharacter();
         getInvite();
     }, [])
@@ -73,7 +89,7 @@ const HomePage = () => {
                 <S.SchoolShapeWrapper backgroundImageUrl={SchoolShape}>
                     <S.Title>Cheers to your new chapter</S.Title>
                     <S.ContentWrapper>
-                        <Friend />
+                        <Friend refreshFlag={refreshGroupFlag} myName={myName} />
                         <Profile />
                         <Information />
                     </S.ContentWrapper>
@@ -83,6 +99,11 @@ const HomePage = () => {
                 <Modal
                     name={groupCreator}
                     characterImage={Character}
+                    groupId={groupId}
+                    onClose={() => {
+                        isHasInvite(false);
+                        refreshGroup();
+                    }}
                 />
             )}
         </S.Wrapper>
