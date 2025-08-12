@@ -42,10 +42,13 @@ const SelectionPage = () => {
             return;
         }
         try {
-            const formData = FormData();
-            selectedPhotos.forEach((index) => {
-                formData.append('files', totalPhoto[index]);
-            });
+            const formData = new FormData();
+            for (const index of selectedPhotos) {
+                const res = await fetch(totalPhoto[index]);
+                const blob = await res.blob();
+                const filename = `photo_${index}.jpg`;
+                formData.append('files', blob, filename);
+            }
             const response = await axiosInstance.post('/album/save-selected', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });

@@ -28,10 +28,8 @@ const HairPage = () => {
 
     const styles = [
         { name: '긴생머리', img: LongHair },
-        { name: '민머리', img: Bald },
         { name: '앞머리없는 숏컷', img: ShortNoBang },
         { name: '단발머리', img: BobHair },
-        { name: '버섯머리', img: MushroomHair },
         { name: '긴 웨이브', img: WaveHair },
     ]
 

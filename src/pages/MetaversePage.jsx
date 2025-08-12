@@ -145,6 +145,11 @@ const MetaversePage = () => {
                 {/* 모델 */}
                 <Suspense fallback={null}>
                     <UniversityModel onLoaded={onLoaded} />
+                    {/* <HumanModel
+                        url={humanData.glb}
+                        position={[humanData.x, humanData.y, humanData.z]}
+                    /> */}
+
                 </Suspense>
                 {/* 이동 */}
                 <Movement
