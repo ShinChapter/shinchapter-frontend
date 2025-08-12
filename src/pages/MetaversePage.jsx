@@ -1,7 +1,7 @@
 import React, { Suspense, useCallback, useState } from 'react';
 import * as S from './MetaversePage.styled';
 import { Canvas } from '@react-three/fiber';
-import { PointerLockControls, Sky, Environment } from '@react-three/drei';
+import { PointerLockControls, Sky, Environment, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { useNavigate } from 'react-router-dom';
 import Camera from '../assets/icons/camera2.png';
@@ -38,13 +38,6 @@ const BUILDING_IMAGES = {
     성신관: MiniSungshin,
     수정관: MiniSoojung,
     도서관: MiniLibrary,
-};
-
-const humanData = {
-    glb: 'http://3.35.186.32:8000/download/merged_3e0b445f-a3d2-403f-b415-3acdcaac532e_flower.glb',
-    x: -3.72,
-    y: 4.0,
-    z: 6.42
 };
 
 const MetaversePage = () => {
@@ -156,6 +149,7 @@ const MetaversePage = () => {
                         url={humanData.glb}
                         position={[humanData.x, humanData.y, humanData.z]}
                     /> */}
+
                 </Suspense>
                 {/* 이동 */}
                 <Movement

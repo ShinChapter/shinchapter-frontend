@@ -1,5 +1,6 @@
 {
   "name": "houscan-frontend",
+  "proxy": "http://3.35.186.32:8000",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
