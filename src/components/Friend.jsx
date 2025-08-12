@@ -4,12 +4,12 @@ import UserPlus from '../assets/icons/user-plus.png';
 import Send from '../assets/icons/send.png';
 import Line from '../assets/images/line2.png';
 import Character from '../assets/images/character.png';
-import { FriendData } from '../constant/friendData';
 import axiosInstance from './../apis/axiosInstance';
 
-const Friend = () => {
+const Friend = ({ refreshFlag, myName }) => {
     const [mode, setMode] = useState('list'); // list, group, invite 중 하나
     const [hasGroup, isHasGroup] = useState(false);
+    const [groupCreator, setGroupCreator] = useState(false);
     const [groupName, setGroupName] = useState('');
     const [groupId, setGroupId] = useState();
     const [friendStudentNumber, setFriendStudentNumber] = useState();
@@ -23,12 +23,19 @@ const Friend = () => {
             setGroupMember(response.data.members);
             console.log('그룹 존재함', response.data);
             isHasGroup(true);
+            if (response.data.members[0].name===myName) {
+                setGroupCreator(true);
+            } else {
+                setGroupCreator(false);
+            }
         } catch(error) {
             if (error.status===404) {
                 isHasGroup(false);
                 console.log('그룹 없음');
+                setGroupCreator(true);
             } else {
                 console.log('내 그룹 목록 조회 실패', error.response);
+                setGroupCreator(true);
             }
         }
     }
@@ -82,16 +89,18 @@ const Friend = () => {
 
     useEffect(() => {
         getGroup();
-    }, [])
+    }, [refreshFlag]);
     
     return (
         <Wrapper>
             {mode==="list" ? (
                 <TopWrapper>
                     <Title>FRIENDS</Title>
-                    <UserIconWrapper onClick={handleMode}>
-                        <Icon src={UserPlus} />
-                    </UserIconWrapper>
+                    {groupCreator && (
+                        <UserIconWrapper onClick={handleMode}>
+                            <Icon src={UserPlus} />
+                        </UserIconWrapper>
+                    )}
                 </TopWrapper>
             ) : 
             mode==="group" ? (
@@ -121,16 +130,17 @@ const Friend = () => {
                 <LineImg1 src={Line} />
                 <LineImg2 src={Line} />
                 <FriendList>
-                    {groupMember.map((friend, index) => (
-                        (index!==0 && friend.accepted) && (
-                            <Member>
+                    {groupMember
+                        .filter(friend => friend.accepted && friend.name !== myName)
+                        .map((friend, index) => (
+                            <Member key={friend.id}>
                                 <MemberBackground style={{ backgroundColor: colors[index % colors.length] }}>
                                     <MembeImg src={Character}/>
                                 </MemberBackground>
                                 <MemberName>{friend.name}</MemberName>
                             </Member>
-                        )
-                    ))}
+                        ))
+                    }
                 </FriendList>
             </FriendListWrapper>
         </Wrapper>
