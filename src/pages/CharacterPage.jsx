@@ -11,8 +11,17 @@ import axiosInstance from '../apis/axiosInstance';
 const CharacterPage = () => {
     const navigate = useNavigate();
 
-    const [name, setName] = useState('사용자');
+    const [name, setName] = useState('');
     const [characterImage, setCharacterImage] = useState();
+
+    const handleName = async () => {
+        try {
+            const response = await axiosInstance.get('/me');
+            setName(response.data.name);
+        } catch(error) {
+            console.log('이름 조회 실패', error);
+        }
+    }
 
     const handleCharacter = async () => {
         try {
@@ -25,6 +34,7 @@ const CharacterPage = () => {
     }
     
     useEffect(() => {
+        handleName();
         handleCharacter();
     }, [])
 

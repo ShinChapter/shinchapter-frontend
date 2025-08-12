@@ -49,6 +49,7 @@ export const FaceWrapper = styled.div`
     align-items: center;
     flex-direction: column;
     gap: 25px;
+    margin-bottom: 50px;
 `
 
 export const FaceImage = styled.img`
@@ -62,6 +63,8 @@ export const HairWrapper = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-bottom: 50px;
+    gap: 25px;
 `
 
 export const ColorOption = styled.div`
@@ -75,9 +78,6 @@ export const Color = styled.button`
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
     background-color: ${({ color }) => color};
     cursor: pointer;
     border: 3px solid ${({$isSelected}) => $isSelected ? '#B87DE9' : 'none'};
@@ -88,18 +88,19 @@ export const styleWrapper = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 25px;
 `
 
 export const StyleOption = styled.div`
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-gap: 20px;
+    display: flex;
+    align-items: center;
     justify-self: center;
+    gap: 25px;
 `
 
 export const Style = styled.img`
-    width: 150px;
-    height: 150px;
+    width: 120px;
+    height: 120px;
     border-radius: 20px;
     cursor: pointer;
     border: 4px solid ${({ $isSelected }) => ($isSelected ? '#B87DE9' : '#98A2B3')};

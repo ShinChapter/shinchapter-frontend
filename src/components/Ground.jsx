@@ -6,7 +6,7 @@ import * as THREE from 'three';
 const Ground = ({ y = -0.02, size = 2000, registerCollider }) => {
     const ref = useRef(null);
     const { gl } = useThree();
-    const texture = useTexture('concrete.png');
+    const texture = useTexture('/concrete.png');
 
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(size / 20, size / 20);
