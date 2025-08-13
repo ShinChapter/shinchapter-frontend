@@ -6,12 +6,18 @@ import Soojung from '../assets/images/soojung.png';
 import Logo from '../assets/icons/logo.png';
 import Title from '../assets/images/title.png';
 import { useNavigate } from 'react-router-dom';
+import Video from '../assets/video/intro.mp4';
 
 const WelcomePage = () => {
     const navigate = useNavigate();
 
     return (
-        <S.Wrapper backgroundImageUrl={Soojung}>
+        <S.Wrapper>
+            <S.BackgroundVideo autoPlay loop muted playsInline>
+                <source src={Video} type="video/mp4" />
+                Your browser does not support the video tag.
+            </S.BackgroundVideo>
+            <S.Overlay />
             <Layout>
                 <S.Container>
                     <S.Logo src={Logo} />

@@ -22,8 +22,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 const BUILDING_TARGETS = {
   성신관: {
-    position: new THREE.Vector3(-36.95, 28.47, -121.53),
-    lookAt: new THREE.Vector3(-37.95, 28.53, -121.52),
+    position: new THREE.Vector3(-36.95, 28.47, -1233),
+    lookAt: new THREE.Vector3(-37.95, 28.53, -1232),
   },
   수정관: {
     position: new THREE.Vector3(-20.74, 28.47, -156.85),
@@ -59,7 +59,7 @@ const getAuthHeader = () => {
   return t ? `Bearer ${t}` : '';
 };
 
-function FinalModel({ url, position = [0, 0, 0], rotationY = 0, targetHeight = 1.3, yOnGround = 0 }) {
+function FinalModel({ url, position = [0, 0, 0], rotationY = 0, targetHeight = 3, yOnGround = 0 }) {
   const [scene, setScene] = useState(null);
   const [err, setErr] = useState(null);
   const ref = useRef();
@@ -103,7 +103,7 @@ function FinalModel({ url, position = [0, 0, 0], rotationY = 0, targetHeight = 1
     const center = new THREE.Vector3();
     box.getSize(size);
     box.getCenter(center);
-    const s = targetHeight / (size.y || 1.3);
+    const s = targetHeight / (size.y || 3);
     ref.current.scale.setScalar(s);
     const box2 = new THREE.Box3().setFromObject(ref.current);
     const size2 = new THREE.Vector3();
@@ -133,7 +133,6 @@ const MetaversePage = () => {
   const [moveTo, setMoveTo] = useState(null);
   const [showBuildings, setShowBuildings] = useState(false);
   const [location, setLocation] = useState('성신여자대학교 정문');
-  const [groupPosition, steGroupPoition] = useState([]);
   const navigate = useNavigate();
   const [finalModels, setFinalModels] = useState([]);
   const [finalLoadErr, setFinalLoadErr] = useState('');
@@ -170,39 +169,6 @@ const MetaversePage = () => {
   }
 }, [groupId]);
 
-  // useEffect(() => {
-  //   let alive = true;
-  //   if (!groupId) {
-  //     setFinalModels([]);
-  //     return;
-  //   }
-  //   (async () => {
-  //     try {
-  //       const r1 = await axiosInstance.get(`/group/${groupId}/final-model`);
-  //       if (!alive) return;
-  //       const arr = Array.isArray(r1.data) ? r1.data : r1.data?.items || [];
-  //       setFinalModels(arr);
-  //       setFinalLoadErr('');
-  //     } catch {
-  //       try {
-  //         const r2 = await axiosInstance.get(`/group/${groupId}/final-model`);
-  //         if (!alive) return;
-  //         const one = r2.data ? [r2.data] : [];
-  //         setFinalModels(one);
-  //         setFinalLoadErr('');
-  //       } catch (e) {
-  //         if (!alive) return;
-  //         console.error(e);
-  //         setFinalModels([]);
-  //         setFinalLoadErr('최종 모델 목록을 불러오지 못했습니다.');
-  //       }
-  //     }
-  //   })();
-  //   return () => {
-  //     alive = false;
-  //   };
-  // }, [groupId]);
-
   const handlePhotoCount = useCallback(async () => {
     try {
       const { data } = await axiosInstance.get('/album/list');
@@ -226,7 +192,6 @@ const MetaversePage = () => {
         </S.LocationWrapper>
         <S.CameraIcon
           src={location !== '성신여자대학교 안' ? Camera : NoCamera}
-          // onClick={location !== '성신여자대학교 안' ? () => navigate(`/metaverse/camera/${groupId || ''}`) : undefined}
           onClick={location !== '성신여자대학교 안' ? () => navigate(`/metaverse/camera}`) : undefined}
           style={{ cursor: location !== '성신여자대학교 안' ? 'pointer' : 'default' }}
         />
@@ -237,7 +202,6 @@ const MetaversePage = () => {
               src={Pin}
               alt="Pin"
               title="Pin"
-              // onClick={() => navigate(`/pin/${groupId || ''}`)}
               onClick={() => navigate(`/pin`)}
               style={{ cursor: 'pointer' }}
             />
@@ -268,12 +232,14 @@ const MetaversePage = () => {
         shadows
         dpr={[1, 2]}
         camera={{ position: [0, 4, 15], fov: 60, near: 0.3, far: 600 }}
-        gl={{ antialias: true, powerPreference: 'high-performance', alpha: false, logarithmicDepthBuffer: true }}
-        onCreated={({ gl }) => {
+        onCreated={({ gl, camera }) => {
           gl.setClearColor('#0b0f14');
           gl.shadowMap.enabled = true;
           gl.shadowMap.type = THREE.PCFSoftShadowMap;
           gl.outputColorSpace = THREE.SRGBColorSpace;
+
+          // 🚨 이 줄 추가
+          camera.lookAt(0, 4, 0); // (0, 4, 0) 위치로 시선 이동 = GLB 중심 쪽
         }}
       >
         <fog attach="fog" args={['#6e81a4ff', 80, 1600]} />
@@ -284,31 +250,17 @@ const MetaversePage = () => {
         <Ground y={0} size={4000} registerCollider={registerCollider} />
         <Suspense fallback={null}>
           <UniversityModel onLoaded={onLoaded} />
-          {/* {finalModels.map((m, idx) => (
-            m.final_model && 
-              <FinalModel
-                key={m.id || idx}
-                url={m.final_model.glb_url}
-                position={[m.final_model.position.x ?? 0, m.final_model.position.y ?? 0, m.final_model.position.z ?? 0]}
-                rotationY={m.rotation_y ?? 0}
-                targetHeight={1}
-                yOnGround={0}
-              />
-          ))} */}
           {finalModels.map((m, idx) => {
             if (!m.final_model || !m.final_model.glb_url) return null;
 
-            const pos = m.final_model.position
-              ? [m.final_model.position.x, m.final_model.position.y, m.final_model.position.z]
-              : [0, 0, 0];
-
+            const pos = m.final_model?.position ?? { x: 0, y: 0, z: 0 };
             return (
               <FinalModel
                 key={m.id || idx}
                 url={m.final_model.glb_url}
-                position={pos}
+                position={[pos.x ?? 0, pos.y ?? 0, pos.z ?? 0]}
                 rotationY={m.rotation_y ?? 0}
-                targetHeight={1.3}
+                targetHeight={3}
                 yOnGround={0}
               />
             );
