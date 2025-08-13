@@ -335,17 +335,19 @@ const MetaverseCameraPage = () => {
             disabled={saving || !groupId}
             onClick={handleSaveFinal}
             style={{
-              width: '100%',
-              padding: '10px 12px',
+              position: 'absolute',
+              left: '50%',
+              transform: 'translate(-50%, 0)',
+              width: '200px',
+              padding: '8px 12px',
               borderRadius: 8,
-              border: '1px solid rgba(255,255,255,0.2)',
-              background: saving ? 'rgba(255,255,255,0.2)' : '#6e81a4',
               color: '#fff',
               cursor: saving ? 'not-allowed' : 'pointer',
               fontWeight: 600,
+              fontSize: '20px',
             }}
           >
-            {saving ? '저장 중…' : '이 위치로 저장'}
+            {saving ? '저장 중' : '위치 저장'}
           </button>
       </S.PhotoCanvas>
 
@@ -363,4 +365,4 @@ const MetaverseCameraPage = () => {
   );
 };
 
-export default MetaverseCameraPage;
+export default MetaverseCameraPage

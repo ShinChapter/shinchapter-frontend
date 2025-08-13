@@ -175,12 +175,41 @@ const MetaversePage = () => {
       if ((data?.images?.length || 0) < 5) {
         alert('사진을 5장 이상 촬영해주세요.');
       } else {
-        navigate(`/selection/${groupId || ''}`);
+        navigate(`/selection`);
       }
     } catch (error) {
       console.log('사진 목록 조회 실패', error?.response);
     }
   }, [navigate, groupId]);
+
+  const glRef = useRef(null);
+  const captureAndUpload = async () => {
+    const gl = glRef.current;
+    if (!gl) return alert('렌더러를 찾을 수 없습니다.');
+
+    const canvas = gl.domElement;
+
+    try {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+
+      const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob((b) => {
+          if (b) resolve(b);
+          else reject(new Error('Blob 생성 실패'));
+        }, 'image/jpeg', 0.95);
+      });
+
+      const formData = new FormData();
+      formData.append('files', blob, 'screenshot.jpg');
+
+      const res = await axiosInstance.post('/album/upload', formData);
+      console.log('업로드 성공:', res.data);
+      alert('사진이 저장되었습니다!');
+    } catch (err) {
+      console.error('업로드 실패', err);
+      alert('업로드에 실패했습니다.');
+    }
+  };
 
   return (
     <S.Wrapper>
@@ -192,7 +221,11 @@ const MetaversePage = () => {
         </S.LocationWrapper>
         <S.CameraIcon
           src={location !== '성신여자대학교 안' ? Camera : NoCamera}
-          onClick={location !== '성신여자대학교 안' ? () => navigate(`/metaverse/camera}`) : undefined}
+          onClick={() => {
+            if (location !== '성신여자대학교 안') {
+              captureAndUpload(); // 클릭 시 캡처+업로드 실행
+            }
+          }}
           style={{ cursor: location !== '성신여자대학교 안' ? 'pointer' : 'default' }}
         />
         {!showBuildings && (
@@ -237,9 +270,8 @@ const MetaversePage = () => {
           gl.shadowMap.enabled = true;
           gl.shadowMap.type = THREE.PCFSoftShadowMap;
           gl.outputColorSpace = THREE.SRGBColorSpace;
-
-          // 🚨 이 줄 추가
-          camera.lookAt(0, 4, 0); // (0, 4, 0) 위치로 시선 이동 = GLB 중심 쪽
+          camera.lookAt(0, 4, 0);
+          glRef.current = gl;
         }}
       >
         <fog attach="fog" args={['#6e81a4ff', 80, 1600]} />
@@ -258,7 +290,7 @@ const MetaversePage = () => {
               <FinalModel
                 key={m.id || idx}
                 url={m.final_model.glb_url}
-                position={[pos.x ?? 0, pos.y ?? 0, pos.z ?? 0]}
+                position={[pos.x ?? 0, pos.y ?? 0, pos.z-9 ?? 0]}
                 rotationY={m.rotation_y ?? 0}
                 targetHeight={3}
                 yOnGround={0}

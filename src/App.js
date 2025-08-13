@@ -28,7 +28,7 @@ const App = () => {
                 <Route path='/metaverse' element={<MetaversePage />} />
                 <Route path='/pin' element={<MetaverseCameraPage />} />
                 <Route path='/selection' element={<SelectionPage />} />
-                <Route path='/album' element={<AlbumPage />} />
+                <Route path='/album/:groupId' element={<AlbumPage />} />
             </Routes>
         </BrowserRouter>
     )

@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import UserPlus from '../assets/icons/user-plus.png';
 import Send from '../assets/icons/send.png';
 import Line from '../assets/images/line2.png';
-import Character from '../assets/images/character.png';
 import axiosInstance from './../apis/axiosInstance';
 
 const Friend = ({ refreshFlag, myName }) => {
@@ -103,10 +102,8 @@ const Friend = ({ refreshFlag, myName }) => {
             setGroupMember(response.data.members);
             if (response.data.leader.name===name) {
                 setGroupCreator(true);
-                console.log('나는 방장!!!!1');
             } else {
                 setGroupCreator(false);
-                console.log('XXXXXXXXXXXXXXXXXXX');
             }
         } catch(error) {
             console.log('handleGroupList 실패', error.response);
@@ -146,8 +143,6 @@ const Friend = ({ refreshFlag, myName }) => {
         });
     }, [myName, refreshFlag]);
 
-
-    
     return (
         <Wrapper>
             {mode==="list" ? (
