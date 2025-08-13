@@ -7,12 +7,26 @@ import Check from '../assets/icons/check.png';
 import Expansion from '../assets/icons/expansion,.png';
 import Back from '../assets/icons/back.png';
 import axiosInstance from './../apis/axiosInstance';
+import { useNavigate } from 'react-router-dom';
 
 const SelectionPage = () => {
     const [totalPhoto, setTotalPhoto] = useState([]);
     const [selectedPhotos, setSelectedPhotos] = useState([]);
     const [previewImage, setPreviewImage] = useState(null); // 확대된 이미지
     const [isPreviewOpen, setIsPreviewOpen] = useState(false); // 확대된 이미지가 존재하는지
+    const navigate = useNavigate();
+    const [groupId, setGroupId] = useState();
+
+    const getGroupId = async () => {
+        try {
+            const response = await axiosInstance.get('/album-group/my');
+            console.log('그룹 id 존재함');
+            const id = response.data.group_id;
+            setGroupId(id);
+        } catch(error) {
+            console.log('그룹 id 없음', error.response);
+        }
+    }
 
     const handlePhoto = async () => {
         try {
@@ -41,22 +55,39 @@ const SelectionPage = () => {
             alert('사진 5장을 선택해주세요.');
             return;
         }
+
         try {
             const formData = new FormData();
             for (const index of selectedPhotos) {
-                const res = await fetch(totalPhoto[index]);
-                const blob = await res.blob();
-                const filename = `photo_${index}.jpg`;
-                formData.append('files', blob, filename);
+            const imageUrl = totalPhoto[index];
+            const res = await fetch(imageUrl);
+            const blob = await res.blob();
+
+            const ext = blob.type.split('/')[1];
+            const filename = `photo_${index}.${ext}`;
+            formData.append('files', blob, filename);
             }
+
             const response = await axiosInstance.post('/album/save-selected', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
             });
+
             console.log('앨범에 넣을 사진', response.data);
-        } catch(error) {
-            console.log('앨범에 넣을 사진 전송 실패', error.response);
+            navigate(`/album/${groupId}`);
+            console.log('페이지 이동');
+        } catch (error) {
+            if (error.response) {
+            console.error('앨범에 넣을 사진 전송 실패:', error.response.status, error.response.data);
+            } else if (error.request) {
+            console.error('요청은 보냈지만 응답이 없음:', error.request);
+            } else {
+            console.error('요청 중 오류 발생:', error.message);
+            }
         }
-    }
+    };
+
 
     const handlePreviewOpen = (event, photo) => {
         event.stopPropagation();
@@ -70,6 +101,7 @@ const SelectionPage = () => {
     }
 
     useEffect(() => {
+        getGroupId();
         handlePhoto();
     }, [])
 
@@ -123,7 +155,7 @@ const SelectionPage = () => {
                         <S.NoPhoto key={`empty-${idx}`} />
                     ))}
                 </S.ChoosenPhotoWrapper>
-                <Button text="DONE" onPress={sendSelectedPhoto}/>
+                <Button text="DONE" onClick={sendSelectedPhoto}/>
             </S.ChoosenWrapper>
             {isPreviewOpen && (
                 <S.PreviewWrapper>

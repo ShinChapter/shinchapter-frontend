@@ -14,6 +14,7 @@ const Profile = () => {
     const [hasAlbum, setHasAlbum] = useState(false);
     const [name, setName] = useState('사용자');
     const [characterImage, setCharacterImage] = useState();
+    const [groupId, setGroupId] = useState();
 
     const handleName = async () => {
         try {
@@ -47,6 +48,10 @@ const Profile = () => {
         }
     }
 
+    const handleNavigation = () => {
+        navigate('/metaverse');
+    }
+
     useEffect(() => {
         handleName();
         handleCharacter();
@@ -61,7 +66,7 @@ const Profile = () => {
                         <button onClick={() => navigate('/album')}>
                             <Icon src={Album} />
                         </button>
-                        <button onClick={() => navigate('/metaverse')}>
+                        <button onClick={handleNavigation}>
                             <Icon src={Metaverse} />
                         </button>
                     </>

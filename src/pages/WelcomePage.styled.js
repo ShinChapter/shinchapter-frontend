@@ -1,15 +1,31 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
 export const Wrapper = styled.div`
+    position: relative;
     width: 100%;
-    background-image: ${({backgroundImageUrl}) => `url(${backgroundImageUrl})`};
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
 `
+
+export const BackgroundVideo = styled.video`
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+`
+export const Overlay = styled.div`
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.79);
+    z-index: 0;
+`;
+
 
 export const Container = styled.div`
     display: flex;

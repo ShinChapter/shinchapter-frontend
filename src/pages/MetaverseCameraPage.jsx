@@ -17,11 +17,12 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 const toAbs = (u) => {
   if (!u) return '';
   if (/^(https?:|data:)/i.test(u)) {
-    const glbMatch = u.match(/\/download\/.+\.glb$/);
-    return glbMatch ? `/glb${glbMatch[0]}` : u;
+    const m = u.match(/\/download\/.+\.glb$/);
+    return m ? `/glb${m[0]}` : u;
   }
   return `/${u.replace(/^\//, '')}`;
 };
+
 
 const getAuthHeader = () => {
   const h =
@@ -125,11 +126,43 @@ const MetaverseCameraPage = () => {
   const [playerDir, setPlayerDir] = useState(null);
   const [modelUrl, setModelUrl] = useState(null);
   const [groups, setGroups] = useState([]);
-  const [selectedGroupId, setSelectedGroupId] = useState('');
+  const [groupId, setGroupId] = useState();
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
   const [saveErr, setSaveErr] = useState('');
   const canvasWrapperRef = useRef(null);
+  const [finalModels, setFinalModels] = useState([]);
+
+  const handleGroupId = async () => {
+    try {
+      const response = await axiosInstance.get('/album-group/my');
+      const id = response.data.group_id;
+      console.log('group id', id);
+      setGroupId(id);
+    } catch(error) {
+      console.log('group id 가져오기 실패', error.response);
+    }
+  }
+
+  const handleGroupPosition = async () => {
+    try {
+      const response = await axiosInstance.get(`/group/${groupId}`);
+      console.log('멤버 위치 정보', response.data.members);
+      setFinalModels(response.data.members);
+    } catch(error) {
+      console.log('멤버 위치 정보 가져오기 실패', error.response);
+    }
+  }
+  
+  useEffect(() => {
+    handleGroupId();
+  }, [])
+  
+  useEffect(() => {
+    if (groupId) {
+      handleGroupPosition(groupId);
+    }
+  }, [groupId]);
 
   useEffect(() => {
     let alive = true;
@@ -141,27 +174,7 @@ const MetaverseCameraPage = () => {
         setModelUrl(data?.glb_url || null);
       } catch (e) {
         if (!alive) return;
-        console.error(e);
-      }
-    })();
-    return () => {
-      alive = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        const { data } = await axiosInstance.get('/album-group/my');
-        if (!alive) return;
-        const arr = Array.isArray(data) ? data : Array.isArray(data?.groups) ? data.groups : data ? [data] : [];
-        setGroups(arr);
-        if (arr.length > 0) setSelectedGroupId(arr[0].group_id || arr[0].id || '');
-      } catch (e) {
-        if (!alive) return;
-        console.error(e);
-        setGroups([]);
+        console.error('아바타 가져오기 실패', e);
       }
     })();
     return () => {
@@ -171,7 +184,8 @@ const MetaverseCameraPage = () => {
 
   const selectDefault = useCallback((e) => {
     e?.stopPropagation?.();
-    setModelUrl(avatar?.glb_url || null);
+    if (!avatar?.glb_url) return;
+    setModelUrl(avatar.glb_url);
   }, [avatar]);
 
   const selectVPose = useCallback((e) => {
@@ -196,20 +210,30 @@ const MetaverseCameraPage = () => {
   const handleSaveFinal = useCallback(async () => {
     setSaveMsg('');
     setSaveErr('');
-    if (!selectedGroupId) return setSaveErr('그룹을 선택하세요.');
+    if (!groupId) return setSaveErr('그룹을 선택하세요.');
     if (!modelUrl) return setSaveErr('모델 URL이 없습니다.');
     if (!playerPos || !playerDir) return setSaveErr('플레이어 위치 정보를 불러오는 중입니다. 캔버스를 클릭 후 다시 시도하세요.');
-    const offset = playerDir.clone().multiplyScalar(2).add(new THREE.Vector3(0, -0.7, 0));
-    const finalPos = playerPos.clone().add(offset);
+    const dirXZ = new THREE.Vector3(playerDir.x, 0, playerDir.z).normalize();
+    const finalPos = playerPos.clone().setY(0).add(new THREE.Vector3(playerDir.x, 0, playerDir.z).normalize().multiplyScalar(2));
+
+    const yaw = Math.atan2(-playerDir.x, -playerDir.z);
+    if (
+      isNaN(finalPos.x) || isNaN(finalPos.z) || isNaN(yaw)
+    ) {
+      return setSaveErr('위치 계산 중 오류가 발생했습니다. 캔버스를 클릭 후 다시 시도해주세요.');
+    }
     setSaving(true);
     try {
-      await axiosInstance.put(`/group/${selectedGroupId}/final-model`, {
+      const response = await axiosInstance.put(`/group/${groupId}/final-model`, {
         model_url: modelUrl,
         pos_x: finalPos.x,
-        pos_y: finalPos.y,
+        pos_y: 0,
         pos_z: finalPos.z,
+        rotation_y: yaw,
       });
       setSaveMsg('최종 모델이 저장되었습니다.');
+      console.log('위치 저장 성공', response.data);
+      navigate('/metaverse');
     } catch (e) {
       const detail =
         e?.response?.data?.message ||
@@ -225,7 +249,7 @@ const MetaverseCameraPage = () => {
     } finally {
       setSaving(false);
     }
-  }, [selectedGroupId, modelUrl, playerPos, playerDir]);
+  }, [groupId, modelUrl, playerPos, playerDir]);
 
   return (
     <S.PhotoWrapper>
@@ -243,7 +267,7 @@ const MetaverseCameraPage = () => {
             camera.rotation.x = THREE.MathUtils.degToRad(-10);
           }}
         >
-          <fog attach="fog" args={['#6e81a4ff', 80, 1600]} />
+          <fog attach="fog" args={['#6e81a4', 80, 1600]} />
           <Sky distance={450000} sunPosition={[100, 200, 100]} turbidity={6} rayleigh={2} />
           <Environment preset="city" />
           <hemisphereLight intensity={0.6} />
@@ -255,11 +279,31 @@ const MetaverseCameraPage = () => {
               <CharacterModel
                 key={modelUrl}
                 url={modelUrl}
-                position={playerPos.clone().add(playerDir.clone().multiplyScalar(2)).add(new THREE.Vector3(0, -0.7, 0))}
+                position={playerPos
+                  .clone()
+                  .add(new THREE.Vector3(playerDir.x, playerDir.y, playerDir.z).normalize().multiplyScalar(5)) // 5미터 앞
+                }
                 rotation={Math.atan2(-playerDir.x, -playerDir.z)}
-                targetHeight={1}
+                targetHeight={2.5}
+                yOnGround={0}
               />
             )}
+
+            {finalModels.map((m, idx) => {
+              const model = m.final_model;
+              if (!model?.glb_url || !model?.position) return null;
+              const pos = model.position;
+              return (
+                <CharacterModel
+                  key={m.id || idx}
+                  url={model.glb_url}
+                  position={[pos.x ?? 0, pos.y-6.15 ?? 0, pos.z-6.15 ?? 0]}
+                  rotation={m.rotation_y ?? 0}
+                  targetHeight={3}
+                  yOnGround={0}
+                />
+              );
+            })}
           </Suspense>
           <Movement colliders={colliders} speed={6} eyeHeight={3.0} maxSlopeDeg={50} moveTo={null} storageKey="Metaverse" />
           <PointerLockControls ref={controlsRef} onLock={() => setIsLocked(true)} onUnlock={() => setIsLocked(false)} />
@@ -287,74 +331,24 @@ const MetaverseCameraPage = () => {
             <img src={toAbs(avatar.preview_url)} alt="캐릭터 미리보기" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
         )}
-
-        <div
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            position: 'absolute',
-            right: 16,
-            bottom: 16,
-            width: 300,
-            padding: 12,
-            borderRadius: 12,
-            background: 'rgba(10,12,16,0.85)',
-            border: '1px solid rgba(255,255,255,0.12)',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
-            color: '#fff',
-            zIndex: 6,
-            backdropFilter: 'blur(6px)',
-          }}
-        >
-          <div style={{ fontSize: 14, marginBottom: 8, opacity: 0.9 }}>최종 모델 저장</div>
-          <label style={{ fontSize: 12, opacity: 0.8 }}>그룹 선택</label>
-          <select
-            value={selectedGroupId}
-            onChange={(e) => setSelectedGroupId(e.target.value)}
-            style={{
-              width: '100%',
-              marginTop: 6,
-              marginBottom: 10,
-              padding: '8px 10px',
-              borderRadius: 8,
-              border: '1px solid rgba(255,255,255,0.18)',
-              background: 'rgba(255,255,255,0.06)',
-              color: '#fff',
-              outline: 'none',
-            }}
-          >
-            {groups.length === 0 && <option value="">(소속된 그룹 없음)</option>}
-            {groups.map((g) => {
-              const id = g.group_id || g.id;
-              return (
-                <option key={id} value={id}>
-                  {g.group_name || g.name || id}
-                </option>
-              );
-            })}
-          </select>
-
           <button
-            disabled={saving || !selectedGroupId}
+            disabled={saving || !groupId}
             onClick={handleSaveFinal}
             style={{
-              width: '100%',
-              padding: '10px 12px',
+              position: 'absolute',
+              left: '50%',
+              transform: 'translate(-50%, 0)',
+              width: '200px',
+              padding: '8px 12px',
               borderRadius: 8,
-              border: '1px solid rgba(255,255,255,0.2)',
-              background: saving ? 'rgba(255,255,255,0.2)' : '#6e81a4',
               color: '#fff',
               cursor: saving ? 'not-allowed' : 'pointer',
               fontWeight: 600,
+              fontSize: '20px',
             }}
           >
-            {saving ? '저장 중…' : '이 위치로 저장'}
+            {saving ? '저장 중' : '위치 저장'}
           </button>
-
-          {(saveMsg || saveErr) && (
-            <div style={{ marginTop: 8, fontSize: 12, color: saveErr ? '#ff9a9a' : '#9affc3' }}>{saveErr || saveMsg}</div>
-          )}
-        </div>
       </S.PhotoCanvas>
 
       <S.ColumnIconWrapper onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()}>
@@ -371,4 +365,4 @@ const MetaverseCameraPage = () => {
   );
 };
 
-export default MetaverseCameraPage;
+export default MetaverseCameraPage

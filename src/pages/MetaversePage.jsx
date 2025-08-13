@@ -3,7 +3,7 @@ import * as S from './MetaversePage.styled';
 import { Canvas } from '@react-three/fiber';
 import { PointerLockControls, Sky, Environment } from '@react-three/drei';
 import * as THREE from 'three';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import Camera from '../assets/icons/camera2.png';
 import NoCamera from '../assets/icons/no-camera.png';
 import Change from '../assets/icons/change.png';
@@ -22,8 +22,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 const BUILDING_TARGETS = {
   성신관: {
-    position: new THREE.Vector3(-36.95, 28.47, -121.53),
-    lookAt: new THREE.Vector3(-37.95, 28.53, -121.52),
+    position: new THREE.Vector3(-36.95, 28.47, -1233),
+    lookAt: new THREE.Vector3(-37.95, 28.53, -1232),
   },
   수정관: {
     position: new THREE.Vector3(-20.74, 28.47, -156.85),
@@ -59,7 +59,7 @@ const getAuthHeader = () => {
   return t ? `Bearer ${t}` : '';
 };
 
-function FinalModel({ url, position = [0, 0, 0], rotationY = 0, targetHeight = 1, yOnGround = 0 }) {
+function FinalModel({ url, position = [0, 0, 0], rotationY = 0, targetHeight = 3, yOnGround = 0 }) {
   const [scene, setScene] = useState(null);
   const [err, setErr] = useState(null);
   const ref = useRef();
@@ -103,7 +103,7 @@ function FinalModel({ url, position = [0, 0, 0], rotationY = 0, targetHeight = 1
     const center = new THREE.Vector3();
     box.getSize(size);
     box.getCenter(center);
-    const s = targetHeight / (size.y || 1);
+    const s = targetHeight / (size.y || 3);
     ref.current.scale.setScalar(s);
     const box2 = new THREE.Box3().setFromObject(ref.current);
     const size2 = new THREE.Vector3();
@@ -116,14 +116,14 @@ function FinalModel({ url, position = [0, 0, 0], rotationY = 0, targetHeight = 1
 
   if (!scene || err) return null;
   return (
-    <group ref={ref} position={position} rotation={[0, rotationY, 0]}>
+    <group ref={ref} position={position} rotation={[0, 0, 0]}>
       <primitive object={scene} />
     </group>
   );
 }
 
 const MetaversePage = () => {
-  const { groupId } = useParams();
+  const [groupId, setGroupId] = useState();
   const [colliders, setColliders] = useState([]);
   const onLoaded = useCallback((meshes) => setColliders(meshes), []);
   const registerCollider = useCallback((obj) => {
@@ -137,38 +137,37 @@ const MetaversePage = () => {
   const [finalModels, setFinalModels] = useState([]);
   const [finalLoadErr, setFinalLoadErr] = useState('');
 
-  useEffect(() => {
-    let alive = true;
-    if (!groupId) {
-      setFinalModels([]);
-      return;
+  const handleGroupId = async () => {
+    try {
+      const response = await axiosInstance.get('/album-group/my');
+      const id = response.data.group_id;
+      console.log('group id', id);
+      setGroupId(id);
+      handleGroupPosition(id)
+    } catch(error) {
+      console.log('group id 가져오기 실패', error.response);
     }
-    (async () => {
-      try {
-        const r1 = await axiosInstance.get(`/group/${groupId}/final-models`);
-        if (!alive) return;
-        const arr = Array.isArray(r1.data) ? r1.data : r1.data?.items || [];
-        setFinalModels(arr);
-        setFinalLoadErr('');
-      } catch {
-        try {
-          const r2 = await axiosInstance.get(`/group/${groupId}/final-model`);
-          if (!alive) return;
-          const one = r2.data ? [r2.data] : [];
-          setFinalModels(one);
-          setFinalLoadErr('');
-        } catch (e) {
-          if (!alive) return;
-          console.error(e);
-          setFinalModels([]);
-          setFinalLoadErr('최종 모델 목록을 불러오지 못했습니다.');
-        }
-      }
-    })();
-    return () => {
-      alive = false;
-    };
-  }, [groupId]);
+  }
+
+  const handleGroupPosition = async (id) => {
+    try {
+      const response = await axiosInstance.get(`/group/${id}`);
+      console.log('멤버 위치 정보', response.data.members);
+      setFinalModels(response.data.members);
+    } catch(error) {
+      console.log('멤버 위치 정보 가져오기 실패', error.response);
+    }
+  }
+
+  useEffect(() => {
+    handleGroupId();
+  }, [])
+  
+  useEffect(() => {
+  if (groupId) {
+    handleGroupPosition(groupId);
+  }
+}, [groupId]);
 
   const handlePhotoCount = useCallback(async () => {
     try {
@@ -176,12 +175,41 @@ const MetaversePage = () => {
       if ((data?.images?.length || 0) < 5) {
         alert('사진을 5장 이상 촬영해주세요.');
       } else {
-        navigate(`/selection/${groupId || ''}`);
+        navigate(`/selection`);
       }
     } catch (error) {
       console.log('사진 목록 조회 실패', error?.response);
     }
   }, [navigate, groupId]);
+
+  const glRef = useRef(null);
+  const captureAndUpload = async () => {
+    const gl = glRef.current;
+    if (!gl) return alert('렌더러를 찾을 수 없습니다.');
+
+    const canvas = gl.domElement;
+
+    try {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+
+      const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob((b) => {
+          if (b) resolve(b);
+          else reject(new Error('Blob 생성 실패'));
+        }, 'image/jpeg', 0.95);
+      });
+
+      const formData = new FormData();
+      formData.append('files', blob, 'screenshot.jpg');
+
+      const res = await axiosInstance.post('/album/upload', formData);
+      console.log('업로드 성공:', res.data);
+      alert('사진이 저장되었습니다!');
+    } catch (err) {
+      console.error('업로드 실패', err);
+      alert('업로드에 실패했습니다.');
+    }
+  };
 
   return (
     <S.Wrapper>
@@ -193,7 +221,11 @@ const MetaversePage = () => {
         </S.LocationWrapper>
         <S.CameraIcon
           src={location !== '성신여자대학교 안' ? Camera : NoCamera}
-          onClick={location !== '성신여자대학교 안' ? () => navigate(`/metaverse/camera/${groupId || ''}`) : undefined}
+          onClick={() => {
+            if (location !== '성신여자대학교 안') {
+              captureAndUpload(); // 클릭 시 캡처+업로드 실행
+            }
+          }}
           style={{ cursor: location !== '성신여자대학교 안' ? 'pointer' : 'default' }}
         />
         {!showBuildings && (
@@ -203,7 +235,7 @@ const MetaversePage = () => {
               src={Pin}
               alt="Pin"
               title="Pin"
-              onClick={() => navigate(`/Pin/${groupId || ''}`)}
+              onClick={() => navigate(`/pin`)}
               style={{ cursor: 'pointer' }}
             />
           </div>
@@ -233,12 +265,13 @@ const MetaversePage = () => {
         shadows
         dpr={[1, 2]}
         camera={{ position: [0, 4, 15], fov: 60, near: 0.3, far: 600 }}
-        gl={{ antialias: true, powerPreference: 'high-performance', alpha: false, logarithmicDepthBuffer: true }}
-        onCreated={({ gl }) => {
+        onCreated={({ gl, camera }) => {
           gl.setClearColor('#0b0f14');
           gl.shadowMap.enabled = true;
           gl.shadowMap.type = THREE.PCFSoftShadowMap;
           gl.outputColorSpace = THREE.SRGBColorSpace;
+          camera.lookAt(0, 4, 0);
+          glRef.current = gl;
         }}
       >
         <fog attach="fog" args={['#6e81a4ff', 80, 1600]} />
@@ -249,16 +282,21 @@ const MetaversePage = () => {
         <Ground y={0} size={4000} registerCollider={registerCollider} />
         <Suspense fallback={null}>
           <UniversityModel onLoaded={onLoaded} />
-          {finalModels.map((m, idx) => (
-            <FinalModel
-              key={m.member_id || m.id || idx}
-              url={m.model_url}
-              position={[m.pos_x ?? 0, m.pos_y ?? 0, m.pos_z ?? 0]}
-              rotationY={m.rotation_y ?? 0}
-              targetHeight={1}
-              yOnGround={0}
-            />
-          ))}
+          {finalModels.map((m, idx) => {
+            if (!m.final_model || !m.final_model.glb_url) return null;
+
+            const pos = m.final_model?.position ?? { x: 0, y: 0, z: 0 };
+            return (
+              <FinalModel
+                key={m.id || idx}
+                url={m.final_model.glb_url}
+                position={[pos.x ?? 0, pos.y ?? 0, pos.z-9 ?? 0]}
+                rotationY={m.rotation_y ?? 0}
+                targetHeight={3}
+                yOnGround={0}
+              />
+            );
+          })}
         </Suspense>
         <Movement
           colliders={colliders}

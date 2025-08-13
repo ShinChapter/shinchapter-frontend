@@ -3,11 +3,11 @@ import styled from 'styled-components';
 import UserPlus from '../assets/icons/user-plus.png';
 import Send from '../assets/icons/send.png';
 import Line from '../assets/images/line2.png';
-import Character from '../assets/images/character.png';
 import axiosInstance from './../apis/axiosInstance';
 
 const Friend = ({ refreshFlag, myName }) => {
     const [mode, setMode] = useState('list'); // list, group, invite 중 하나
+    const [name, setName] = useState();
     const [hasGroup, isHasGroup] = useState(false);
     const [groupCreator, setGroupCreator] = useState(false);
     const [groupName, setGroupName] = useState('');
@@ -17,6 +17,15 @@ const Friend = ({ refreshFlag, myName }) => {
 
     const colors = ['#FFDBEE', '#D0FFFA', '#E4C5FF', '#FFFED3', '#B3B2B2', '#FFFFFF'];
     
+    const handleName = async () => {
+        try {
+            const response = await axiosInstance.get('/me');
+            setName(response.data.name);
+        } catch(error) {
+            console.log('이름 조회 실패', error);
+        }
+    }
+
     const getGroup = async () => {
         try {
             const response = await axiosInstance.get('/album-group/my');
@@ -25,13 +34,8 @@ const Friend = ({ refreshFlag, myName }) => {
             setGroupId(response.data.group_id);
             console.log('그룹 생성자 이름', response.data.members[0].name);
             console.log('내 이름', myName);
-            handleGroupList(response.data.group_id);
-            
-            if (response.data.members[0].name===myName) {
-                setGroupCreator(true);
-            } else {
-                setGroupCreator(false);
-            }
+            const id = response.data.group_id;
+            handleGroupList(id);
         } catch(error) {
             if (error.status===404) {
                 isHasGroup(false);
@@ -96,6 +100,11 @@ const Friend = ({ refreshFlag, myName }) => {
             const response = await axiosInstance.get(`/group/${groupId}`);
             console.log('handleGroupList 성공', response.data);
             setGroupMember(response.data.members);
+            if (response.data.leader.name===name) {
+                setGroupCreator(true);
+            } else {
+                setGroupCreator(false);
+            }
         } catch(error) {
             console.log('handleGroupList 실패', error.response);
         }
@@ -106,9 +115,34 @@ const Friend = ({ refreshFlag, myName }) => {
     }, [])
 
     useEffect(() => {
-        getGroup();
-    }, [refreshFlag]);
-    
+        const fetchAll = async () => {
+            await handleName(); 
+            const groupRes = await axiosInstance.get('/album-group/my');
+            isHasGroup(true);
+            setGroupId(groupRes.data.group_id);
+
+            const groupDetailRes = await axiosInstance.get(`/group/${groupRes.data.group_id}`);
+            setGroupMember(groupDetailRes.data.members);
+
+            if (groupDetailRes.data.leader.name === name) {
+                setGroupCreator(true);
+            } else {
+                setGroupCreator(false);
+            }
+        }
+
+        fetchAll().catch(err => {
+            if (err?.response?.status === 404) {
+                isHasGroup(false);
+                setGroupCreator(true);
+                console.log('그룹 없음');
+            } else {
+                setGroupCreator(true);
+                console.log('그룹 조회 실패', err);
+            }
+        });
+    }, [myName, refreshFlag]);
+
     return (
         <Wrapper>
             {mode==="list" ? (

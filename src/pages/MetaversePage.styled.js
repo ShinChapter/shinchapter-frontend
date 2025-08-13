@@ -47,13 +47,14 @@ export const CameraIcon = styled.img`
     width: 70px;
     height: 70px;
     cursor: pointer;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 `
 
 export const Icon = styled.img`
     width: 70px;
     height: 70px;
     cursor: pointer;
+    margin-bottom: 20px;
 `
 
 export const DropdownIconWrapper = styled.div`

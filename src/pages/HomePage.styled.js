@@ -8,6 +8,15 @@ export const Wrapper = styled.div`
     background-position: center;
     background-size: cover;
 `
+export const BackgroundVideo = styled.video`
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+`;
 
 export const SchoolShapeWrapper = styled.div`
     width: 1400px;

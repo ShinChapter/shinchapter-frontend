@@ -88,6 +88,7 @@ export const FriendImageWrapper = styled.div`
     border-radius: 10px;
     box-shadow: 4px 4px 15px 0px rgba(0, 0, 0, 0.1);
     background-color: ${(props) => props.backgroundColor ? "#DECAEF" : "FFFFFF"};
+    overflow: hidden;
 `
 
 export const FriendImage = styled.img`
@@ -95,7 +96,8 @@ export const FriendImage = styled.img`
     height: 200px;
     border-radius: 10px;
     object-fit: cover;
-    object-position: top;
+    scale: 2.5;
+    transform-origin: top;
 `
 
 export const FriendName = styled.p`
@@ -164,7 +166,7 @@ export const SmallAlbum1 = styled.img`
     border-radius: 20px;
     position: absolute;
     top: 40px;
-    left: 70px
+    left: 70px;
 `
 
 export const SmallAlbum2 = styled.img`
@@ -174,7 +176,7 @@ export const SmallAlbum2 = styled.img`
     border-radius: 20px;
     position: absolute;
     top: 270px;
-    right: 60px
+    right: 60px;
 `
 
 export const SmallAlbum3 = styled.img`
@@ -185,4 +187,24 @@ export const SmallAlbum3 = styled.img`
     position: absolute;
     bottom: 40px;
     left: 70px;
+`
+
+export const ShareIconWrapper = styled.button`
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    left: 50px;
+    top: 30px;
+    z-index: 10;
+    background: none;
+    border: none;
+    
+    @media (max-width: 1500px) {
+        display: none;
+    }
+`
+
+export const ShareIcon = styled.img`
+    width: 100%;
+    height: 100%;
 `
