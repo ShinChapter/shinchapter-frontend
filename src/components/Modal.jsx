@@ -11,9 +11,9 @@ const Modal = ({ name, characterImage, groupId, onClose }) => {
                 accept: accept
             });
             console.log('그룹 초대 응답', response.data.message);
-            if (onClose) onClose();
         } catch(error) {
             console.log('그룹 초대 응답 실패', error.response);
+        } finally {
             if (onClose) onClose();
         }
     }
@@ -55,14 +55,16 @@ const ProfileWrapper = styled.div`
     width: 106px;
     height: 106px;
     border-radius: 50%;
+    overflow: hidden;
 `
 
 const ProfileImage = styled.img`
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    object-fit: cover;
-    object-position: top;
+    scale: 2.5;
+    transform-origin: top;
+    padding-top: 2px;
 `
 
 const Text = styled.h3`

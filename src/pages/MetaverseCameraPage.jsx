@@ -14,14 +14,16 @@ import Movement from './../components/Movement';
 import axiosInstance from './../apis/axiosInstance';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
-const toAbs = (u) => {
-  if (!u) return '';
-  if (/^(https?:|data:)/i.test(u)) {
-    const glbMatch = u.match(/\/download\/.+\.glb$/);
-    return glbMatch ? `/glb${glbMatch[0]}` : u;
-  }
-  return `/${u.replace(/^\//, '')}`;
-};
+// const toAbs = (u) => {
+//   if (!u) return '';
+//   if (/^(https?:|data:)/i.test(u)) {
+//     const glbMatch = u.match(/\/download\/.+\.glb$/);
+//     return glbMatch ? `/glb${glbMatch[0]}` : u;
+//   }
+//   return `/${u.replace(/^\//, '')}`;
+// };
+
+const toAbs = (u) => u || '';
 
 const getAuthHeader = () => {
   const h =
@@ -126,10 +128,25 @@ const MetaverseCameraPage = () => {
   const [modelUrl, setModelUrl] = useState(null);
   const [groups, setGroups] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState('');
+  const [groupPosition, setGroupPoition] = useState([]);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
   const [saveErr, setSaveErr] = useState('');
   const canvasWrapperRef = useRef(null);
+
+  const handleGroupPosition = async () => {
+    try {
+      const response = await axiosInstance.get(`/group/${selectedGroupId}`);
+      console.log('멤버 위치 정보', response.data.members);
+      setGroupPoition();
+    } catch(error) {
+      console.log('멤버 위치 정보 가져오기 실패', error.response);
+    }
+  }
+
+  useEffect(() => {
+    handleGroupPosition();
+  }, [])
 
   useEffect(() => {
     let alive = true;
@@ -203,13 +220,15 @@ const MetaverseCameraPage = () => {
     const finalPos = playerPos.clone().add(offset);
     setSaving(true);
     try {
-      await axiosInstance.put(`/group/${selectedGroupId}/final-model`, {
+      const response = await axiosInstance.put(`/group/${selectedGroupId}/final-model`, {
         model_url: modelUrl,
         pos_x: finalPos.x,
         pos_y: finalPos.y,
         pos_z: finalPos.z,
       });
       setSaveMsg('최종 모델이 저장되었습니다.');
+      console.log('위치 저장 성공', response.data);
+      navigate('/metaverse');
     } catch (e) {
       const detail =
         e?.response?.data?.message ||

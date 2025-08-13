@@ -26,7 +26,7 @@ const App = () => {
                 <Route path='/character' element={<CharacterPage />} />
                 <Route path='/home' element={<HomePage />} />
                 <Route path='/metaverse' element={<MetaversePage />} />
-                <Route path='/Pin' element={<MetaverseCameraPage />} />
+                <Route path='/pin' element={<MetaverseCameraPage />} />
                 <Route path='/selection' element={<SelectionPage />} />
                 <Route path='/album' element={<AlbumPage />} />
             </Routes>

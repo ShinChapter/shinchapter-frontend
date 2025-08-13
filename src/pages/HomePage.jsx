@@ -18,6 +18,7 @@ const HomePage = () => {
     const [myName, setMyName] = useState();
     const [hasInvite, isHasInvite] = useState(false);
     const [groupCreator, isGroupCreator] = useState();
+    const [characterImage, setCharacterImage] = useState();
     const [groupId, setGroupId] = useState();
 
     const [refreshGroupFlag, setRefreshGroupFlag] = useState(false);
@@ -49,6 +50,7 @@ const HomePage = () => {
                 isHasInvite(true);
                 isGroupCreator(response.data[0].invited_by.name);
                 setGroupId(response.data[0].group_id);
+                setCharacterImage(response.data[0].invited_by.image);
             } else {
                 console.log('초대 내역 없음', response);
                 isHasInvite(false);
@@ -98,10 +100,11 @@ const HomePage = () => {
             {hasInvite && (
                 <Modal
                     name={groupCreator}
-                    characterImage={Character}
+                    characterImage={characterImage}
                     groupId={groupId}
                     onClose={() => {
                         isHasInvite(false);
+                        isGroupCreator(false);
                         refreshGroup();
                     }}
                 />
